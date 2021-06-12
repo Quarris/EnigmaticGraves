@@ -1,0 +1,15 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "compatibilityLevel": "JAVA_8",
+    "package": "dev.quarris.enigmaticgraves.mixins",
+    "refmap": "enigmaticgraves.refmap.json",
+    "mixins": [
+        "PlayerEntityMixin"
+    ],
+    "client": [
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
