@@ -22,7 +22,7 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.0'
+version = '0.1'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -86,13 +86,16 @@ repositories {
     maven {
         url = "https://maven.theillusivec4.top/"
     }
+    maven {
+        url = "https://maven.florens.be/"
+    }
 
     flatDir { dirs 'mods' }
 }
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.25'
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1")
+    compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1:api")
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
@@ -100,18 +103,21 @@ dependencies {
 
     runtimeOnly fg.deobf('unused:cofh_core-1.16.4:1.2.1')
     runtimeOnly fg.deobf('unused:ensorcellation-1.16.4:1.2.0')
+    implementation fg.deobf("be.florens:expandability-forge:2.0.1")
+    runtimeOnly fg.deobf('unused:Artifacts-1.16.5:2.9.3')
 }
 
 jar {
     manifest {
         attributes([
-            "Specification-Title": "enigmaticgraves",
-            "Specification-Vendor": "quarris",
-            "Specification-Version": "1", // We are version 1 of ourselves
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"quarris",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+                "Specification-Title"     : "enigmaticgraves",
+                "Specification-Vendor"    : "quarris",
+                "Specification-Version"   : "1", // We are version 1 of ourselves
+                "Implementation-Title"    : project.name,
+                "Implementation-Version"  : "${version}",
+                "Implementation-Vendor"   : "quarris",
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                "MixinConnector": "dev.quarris.enigmaticgraves.MixinConnector"
         ])
     }
 }

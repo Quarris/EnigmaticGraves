@@ -14,7 +14,6 @@ public class CommonEvents {
         if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().world.isRemote)
             return;
 
-
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
         GraveManager.prepPlayerGrave(player);
     }

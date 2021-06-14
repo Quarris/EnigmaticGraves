@@ -1,5 +1,8 @@
 package dev.quarris.enigmaticgraves.grave;
 
+import dev.quarris.enigmaticgraves.compat.CompatManager;
+import dev.quarris.enigmaticgraves.compat.CurioCompat;
+import dev.quarris.enigmaticgraves.compat.CurioGraveData;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.config.GraveConfigs.Common.ExperienceHandling;
 import dev.quarris.enigmaticgraves.entity.GraveEntity;
@@ -19,6 +22,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class GraveManager {
@@ -29,12 +33,16 @@ public class GraveManager {
     public static void init() {
         GRAVE_DATA_SUPPLIERS.put(PlayerInventoryGraveData.NAME, PlayerInventoryGraveData::new);
         GRAVE_DATA_SUPPLIERS.put(ExperienceGraveData.NAME, ExperienceGraveData::new);
+        if (CompatManager.isCuriosLoaded()) {
+            GRAVE_DATA_SUPPLIERS.put(CurioGraveData.NAME, CurioGraveData::new);
+        }
     }
 
     public static WorldGraveData getWorldGraveData(IWorld world) {
         if (world instanceof ServerWorld) {
             MinecraftServer server = ((ServerWorld) world).getServer();
-            return server.getWorld(World.OVERWORLD).getSavedData().getOrCreate(WorldGraveData::new, WorldGraveData.NAME);
+            ServerWorld overworld = server.getWorld(World.OVERWORLD);
+            return overworld.getSavedData().getOrCreate(() -> new WorldGraveData(overworld), WorldGraveData.NAME);
         }
 
         return null;
@@ -99,7 +107,13 @@ public class GraveManager {
             ExperienceGraveData xpData = new ExperienceGraveData(xp);
             dataList.add(xpData);
         }
-        // TODO Add curios grave data
+
+        if (CompatManager.isCuriosLoaded()) {
+            IGraveData curiosData = CurioCompat.generateCurioGraveData(player, drops);
+            if (curiosData != null) {
+                dataList.add(curiosData);
+            }
+        }
 
         entry.dataList = dataList;
     }

@@ -110,6 +110,7 @@ public class GraveEntity extends Entity {
     @Override
     protected void readAdditional(CompoundNBT compound) {
         CompoundNBT graveNBT = compound.getCompound("Grave");
+
         List<IGraveData> dataList = new ArrayList<>();
         ListNBT contentNBT = graveNBT.getList("Content", Constants.NBT.TAG_COMPOUND);
         for (INBT inbt : contentNBT) {

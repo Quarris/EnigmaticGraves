@@ -27,12 +27,11 @@ public class PlayerInventoryGraveData implements IGraveData {
         // Compare the inventory with the player drops
         // If an item from the inventory is not in drops,
         // that means that the item should not be put in the grave
-        Set<ItemStack> testDrops = new HashSet<>(drops);
         loop:
         for (int slot = 0; slot < graveInv.getSizeInventory(); slot++) {
             ItemStack stack = graveInv.getStackInSlot(slot);
 
-            Iterator<ItemStack> ite = testDrops.iterator();
+            Iterator<ItemStack> ite = drops.iterator();
             while (ite.hasNext()) {
                 ItemStack drop = ite.next();
                 if (ItemStack.areItemStacksEqual(stack, drop)) {

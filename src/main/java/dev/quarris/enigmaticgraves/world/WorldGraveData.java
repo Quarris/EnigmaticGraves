@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
@@ -19,10 +20,12 @@ public class WorldGraveData extends WorldSavedData {
 
     public static final String NAME = ModRef.res("graves").toString();
 
+    private final ServerWorld world;
     private final LinkedListMultimap<UUID, PlayerGraveEntry> playerGraveEntries = LinkedListMultimap.create();
 
-    public WorldGraveData() {
+    public WorldGraveData(ServerWorld world) {
         super(NAME);
+        this.world = world;
     }
 
     public List<PlayerGraveEntry> getGraveEntriesForPlayer(UUID playerUUID) {
