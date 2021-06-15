@@ -2,15 +2,13 @@ package dev.quarris.enigmaticgraves.grave;
 
 import dev.quarris.enigmaticgraves.compat.CompatManager;
 import dev.quarris.enigmaticgraves.compat.CurioCompat;
-import dev.quarris.enigmaticgraves.compat.CurioGraveData;
+import dev.quarris.enigmaticgraves.grave.data.CurioGraveData;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.config.GraveConfigs.Common.ExperienceHandling;
-import dev.quarris.enigmaticgraves.entity.GraveEntity;
+import dev.quarris.enigmaticgraves.content.GraveEntity;
 import dev.quarris.enigmaticgraves.grave.data.ExperienceGraveData;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import dev.quarris.enigmaticgraves.grave.data.PlayerInventoryGraveData;
-import dev.quarris.enigmaticgraves.world.PlayerGraveEntry;
-import dev.quarris.enigmaticgraves.world.WorldGraveData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -21,14 +19,16 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class GraveManager {
 
     public static final HashMap<ResourceLocation, Function<CompoundNBT, IGraveData>> GRAVE_DATA_SUPPLIERS = new HashMap<>();
     public static final HashMap<UUID, PlayerGraveEntry> LATEST_GRAVE_ENTRY = new HashMap<>();
+    public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
     public static void init() {
         GRAVE_DATA_SUPPLIERS.put(PlayerInventoryGraveData.NAME, PlayerInventoryGraveData::new);
@@ -42,7 +42,7 @@ public class GraveManager {
         if (world instanceof ServerWorld) {
             MinecraftServer server = ((ServerWorld) world).getServer();
             ServerWorld overworld = server.getWorld(World.OVERWORLD);
-            return overworld.getSavedData().getOrCreate(() -> new WorldGraveData(overworld), WorldGraveData.NAME);
+            return overworld.getSavedData().getOrCreate(WorldGraveData::new, WorldGraveData.NAME);
         }
 
         return null;
@@ -79,7 +79,7 @@ public class GraveManager {
         GraveEntity grave = GraveEntity.createGrave(player, entry.dataList);
         entry.graveUUID = grave.getUniqueID();
         player.world.addEntity(grave);
-        worldData.createAndInsertGraveEntry(player, grave.getUniqueID(), entry);
+        worldData.addGraveEntry(player, grave.getUniqueID(), entry);
 
         LATEST_GRAVE_ENTRY.remove(player.getUniqueID());
     }
@@ -116,5 +116,9 @@ public class GraveManager {
         }
 
         entry.dataList = dataList;
+    }
+
+    public static void setGraveRestored(UUID player, GraveEntity grave) {
+        getWorldGraveData(grave.world).getGraveEntriesForPlayer(player).stream().filter(entry -> entry.graveUUID.equals(grave.getUniqueID())).findFirst().ifPresent(PlayerGraveEntry::setRestored);
     }
 }

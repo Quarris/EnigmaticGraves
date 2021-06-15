@@ -1,4 +1,4 @@
-package dev.quarris.enigmaticgraves;
+package dev.quarris.enigmaticgraves.utils;
 
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;

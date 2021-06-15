@@ -44,12 +44,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
 
         Collection<ItemEntity> drops = captureDrops(null);
-        if (CompatManager.isCuriosLoaded()) {
-            CurioCompat.cacheCurios(thisPlayer);
-        }
+        CompatManager.cacheModdedHandlers(thisPlayer);
         if (!net.minecraftforge.common.ForgeHooks.onLivingDrops(this, damageSourceIn, drops, i, recentlyHit > 0)) {
-            //drops.forEach(e -> world.addEntity(e));
             GraveManager.populatePlayerGrave(thisPlayer, drops.stream().map(ItemEntity::getItem).collect(Collectors.toList()));
+            //drops.forEach(e -> world.addEntity(e));
         }
         GraveManager.spawnPlayerGrave((PlayerEntity) this.getEntity());
     }

@@ -1,7 +1,7 @@
 package dev.quarris.enigmaticgraves.grave.data;
 
-import dev.quarris.enigmaticgraves.ModRef;
-import dev.quarris.enigmaticgraves.PlayerInventoryExtensions;
+import dev.quarris.enigmaticgraves.utils.ModRef;
+import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
@@ -11,9 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 public class PlayerInventoryGraveData implements IGraveData {
 

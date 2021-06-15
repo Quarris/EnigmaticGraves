@@ -1,7 +1,7 @@
-package dev.quarris.enigmaticgraves.registry;
+package dev.quarris.enigmaticgraves.setup;
 
-import dev.quarris.enigmaticgraves.ModRef;
-import dev.quarris.enigmaticgraves.entity.GraveEntity;
+import dev.quarris.enigmaticgraves.utils.ModRef;
+import dev.quarris.enigmaticgraves.content.GraveEntity;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;

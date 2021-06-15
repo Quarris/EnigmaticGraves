@@ -1,5 +1,6 @@
 package dev.quarris.enigmaticgraves.compat;
 
+import dev.quarris.enigmaticgraves.grave.data.CurioGraveData;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;

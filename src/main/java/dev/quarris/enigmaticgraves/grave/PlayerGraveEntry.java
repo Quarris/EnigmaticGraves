@@ -1,8 +1,6 @@
-package dev.quarris.enigmaticgraves.world;
+package dev.quarris.enigmaticgraves.grave;
 
-import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
-import dev.quarris.enigmaticgraves.grave.data.PlayerInventoryGraveData;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -11,7 +9,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,11 +21,15 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
     public PlayerInventory inventory;
     // Holds the UUID of the grave entity that this entry belongs to
     public UUID graveUUID;
+    public Date timestamp;
     public List<IGraveData> dataList = new ArrayList<>();
+
+    private boolean restored;
 
     public PlayerGraveEntry(PlayerInventory inventory) {
         this.inventory = new PlayerInventory(inventory.player);
         this.inventory.copyInventory(inventory);
+        this.timestamp = new Date();
     }
 
     public PlayerGraveEntry(CompoundNBT nbt) {
@@ -32,11 +37,15 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
         this.deserializeNBT(nbt);
     }
 
+    public String getEntryName(int id) {
+        return String.format("death_%d_%s", id, GraveManager.TIMESTAMP_FORMAT.format(this.timestamp));
+    }
+
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putUniqueId("Grave", this.graveUUID);
-
+        nbt.putLong("Timestamp", this.timestamp.getTime());
         ListNBT dataNBT = new ListNBT();
         for (IGraveData data : this.dataList) {
             dataNBT.add(data.serializeNBT());
@@ -49,7 +58,7 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         this.graveUUID = nbt.getUniqueId("Grave");
-
+        this.timestamp = new Date(nbt.getLong("Timestamp"));
         ListNBT dataNBT = nbt.getList("Data", Constants.NBT.TAG_COMPOUND);
         for (INBT inbt : dataNBT) {
             CompoundNBT graveNBT = (CompoundNBT) inbt;
@@ -57,5 +66,13 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
             IGraveData data = GraveManager.GRAVE_DATA_SUPPLIERS.get(name).apply(graveNBT);
             this.dataList.add(data);
         }
+    }
+
+    public void setRestored() {
+        this.restored = true;
+    }
+
+    public boolean isRestored() {
+        return this.restored;
     }
 }

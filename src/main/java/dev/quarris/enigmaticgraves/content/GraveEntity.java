@@ -1,8 +1,8 @@
-package dev.quarris.enigmaticgraves.entity;
+package dev.quarris.enigmaticgraves.content;
 
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
-import dev.quarris.enigmaticgraves.registry.Registry;
+import dev.quarris.enigmaticgraves.setup.Registry;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -17,7 +17,6 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -48,6 +47,17 @@ public class GraveEntity extends Entity {
     public GraveEntity(PlayerEntity player) {
         this(Registry.GRAVE_ENTITY_TYPE.get(), player.world);
         this.setOwner(player.getUniqueID());
+    }
+
+    @Override
+    public void tick() {
+        if (!this.world.isRemote) {
+            if (GraveManager.getWorldGraveData(this.world).isGraveRestored(this.getUniqueID())) {
+                this.remove();
+                GraveManager.getWorldGraveData(this.world).removeGraveRestored(this.getUniqueID());
+            }
+        }
+        super.tick();
     }
 
     @Override
@@ -86,6 +96,7 @@ public class GraveEntity extends Entity {
         for (IGraveData data : this.contents) {
             data.restore(player);
         }
+        GraveManager.setGraveRestored(this.getOwnerUUID(), this);
         this.remove();
     }
 

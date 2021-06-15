@@ -1,6 +1,6 @@
 package dev.quarris.enigmaticgraves.grave.data;
 
-import dev.quarris.enigmaticgraves.ModRef;
+import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;

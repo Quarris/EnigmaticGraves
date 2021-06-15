@@ -1,5 +1,6 @@
-package dev.quarris.enigmaticgraves;
+package dev.quarris.enigmaticgraves.utils;
 
+import dev.quarris.enigmaticgraves.EnigmaticGraves;
 import net.minecraft.util.ResourceLocation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

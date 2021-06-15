@@ -1,5 +1,6 @@
 package dev.quarris.enigmaticgraves.compat;
 
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraftforge.fml.ModList;
 
 public class CompatManager {
@@ -10,6 +11,12 @@ public class CompatManager {
 
     public static boolean isCuriosLoaded() {
         return isModLoaded("curios");
+    }
+
+    public static void cacheModdedHandlers(PlayerEntity player) {
+        if (CompatManager.isCuriosLoaded()) {
+            CurioCompat.cacheCurios(player);
+        }
     }
 
 }

@@ -1,7 +1,6 @@
-package dev.quarris.enigmaticgraves.compat;
+package dev.quarris.enigmaticgraves.grave.data;
 
-import dev.quarris.enigmaticgraves.ModRef;
-import dev.quarris.enigmaticgraves.grave.data.IGraveData;
+import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;

@@ -1,31 +1,28 @@
-package dev.quarris.enigmaticgraves.world;
+package dev.quarris.enigmaticgraves.grave;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.LinkedListMultimap;
-import dev.quarris.enigmaticgraves.ModRef;
-import dev.quarris.enigmaticgraves.grave.data.IGraveData;
+import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.*;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class WorldGraveData extends WorldSavedData {
 
     public static final String NAME = ModRef.res("graves").toString();
 
-    private final ServerWorld world;
     private final LinkedListMultimap<UUID, PlayerGraveEntry> playerGraveEntries = LinkedListMultimap.create();
+    private final Set<UUID> restoredGraves = new HashSet<>();
 
-    public WorldGraveData(ServerWorld world) {
+    public WorldGraveData() {
         super(NAME);
-        this.world = world;
     }
 
     public List<PlayerGraveEntry> getGraveEntriesForPlayer(UUID playerUUID) {
@@ -47,12 +44,19 @@ public class WorldGraveData extends WorldSavedData {
             playerGraveEntriesNBT.add(playerGravesNBT);
         }
         compound.put("PlayerGraveEntries", playerGraveEntriesNBT);
+
+        ListNBT restoredGravesNBT = new ListNBT();
+        for (UUID restoredGraveUUID : this.restoredGraves) {
+            restoredGravesNBT.add(NBTUtil.func_240626_a_(restoredGraveUUID));
+        }
+        compound.put("RestoredGraves", restoredGravesNBT);
         return compound;
     }
 
     @Override
     public void read(CompoundNBT nbt) {
         this.playerGraveEntries.clear();
+        this.restoredGraves.clear();
         ListNBT playerGraveEntriesNBT = nbt.getList("PlayerGraveEntries", Constants.NBT.TAG_COMPOUND);
         for (INBT inbt : playerGraveEntriesNBT) {
             CompoundNBT playerGravesNBT = (CompoundNBT) inbt;
@@ -64,10 +68,37 @@ public class WorldGraveData extends WorldSavedData {
                 this.playerGraveEntries.put(uuid, entry);
             }
         }
+        ListNBT restoredGravesNBT = nbt.getList("RestoredGraves", Constants.NBT.TAG_COMPOUND);
+        for (INBT uuidNBT : restoredGravesNBT) {
+            UUID restoredGraveUUID = NBTUtil.readUniqueId(uuidNBT);
+            this.restoredGraves.add(restoredGraveUUID);
+        }
     }
 
-    public void createAndInsertGraveEntry(PlayerEntity player, UUID graveUUID, PlayerGraveEntry entry) {
+    public void setGraveRestored(UUID graveUUID) {
+        this.restoredGraves.add(graveUUID);
+        this.markDirty();
+    }
+
+    public void removeGraveRestored(UUID graveUUID) {
+        this.restoredGraves.remove(graveUUID);
+        this.markDirty();
+    }
+
+    public boolean isGraveRestored(UUID graveUUID) {
+        return this.restoredGraves.contains(graveUUID);
+    }
+
+    public void addGraveEntry(PlayerEntity player, UUID graveUUID, PlayerGraveEntry entry) {
         this.playerGraveEntries.put(player.getUniqueID(), entry);
         // TODO check the max amount of graves per player
+        this.markDirty();
     }
+
+    public void clearGraveEntries(PlayerEntity player) {
+        this.playerGraveEntries.removeAll(player.getUniqueID());
+        this.markDirty();
+    }
+
+
 }

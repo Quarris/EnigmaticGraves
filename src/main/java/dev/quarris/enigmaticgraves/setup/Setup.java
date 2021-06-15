@@ -1,8 +1,7 @@
-package dev.quarris.enigmaticgraves;
+package dev.quarris.enigmaticgraves.setup;
 
-import dev.quarris.enigmaticgraves.entity.GraveEntityRenderer;
-import dev.quarris.enigmaticgraves.grave.GraveManager;
-import dev.quarris.enigmaticgraves.registry.Registry;
+import dev.quarris.enigmaticgraves.utils.ModRef;
+import dev.quarris.enigmaticgraves.content.GraveEntityRenderer;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
