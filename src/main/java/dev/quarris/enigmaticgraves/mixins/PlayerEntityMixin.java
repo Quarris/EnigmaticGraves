@@ -47,7 +47,6 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         CompatManager.cacheModdedHandlers(thisPlayer);
         if (!net.minecraftforge.common.ForgeHooks.onLivingDrops(this, damageSourceIn, drops, i, recentlyHit > 0)) {
             GraveManager.populatePlayerGrave(thisPlayer, drops.stream().map(ItemEntity::getItem).collect(Collectors.toList()));
-            //drops.forEach(e -> world.addEntity(e));
         }
         GraveManager.spawnPlayerGrave((PlayerEntity) this.getEntity());
     }

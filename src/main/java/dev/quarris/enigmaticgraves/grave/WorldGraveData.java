@@ -1,6 +1,7 @@
 package dev.quarris.enigmaticgraves.grave;
 
 import com.google.common.collect.LinkedListMultimap;
+import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -9,25 +10,52 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class WorldGraveData extends WorldSavedData {
 
     public static final String NAME = ModRef.res("graves").toString();
 
-    private final LinkedListMultimap<UUID, PlayerGraveEntry> playerGraveEntries = LinkedListMultimap.create();
+    private final Map<UUID, LinkedList<PlayerGraveEntry>> playerGraveEntries = new HashMap<>();
     private final Set<UUID> restoredGraves = new HashSet<>();
 
     public WorldGraveData() {
         super(NAME);
     }
 
-    public List<PlayerGraveEntry> getGraveEntriesForPlayer(UUID playerUUID) {
+    public LinkedList<PlayerGraveEntry> getGraveEntriesForPlayer(UUID playerUUID) {
         return this.playerGraveEntries.get(playerUUID);
     }
+
+    public void setGraveRestored(UUID graveUUID) {
+        this.restoredGraves.add(graveUUID);
+        this.markDirty();
+    }
+
+    public void removeGraveRestored(UUID graveUUID) {
+        this.restoredGraves.remove(graveUUID);
+        this.markDirty();
+    }
+
+    public boolean isGraveRestored(UUID graveUUID) {
+        return this.restoredGraves.contains(graveUUID);
+    }
+
+    public void addGraveEntry(PlayerEntity player, UUID graveUUID, PlayerGraveEntry entry) {
+        LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(player.getUniqueID(), k -> new LinkedList<>());
+        if (entries.size() >= GraveConfigs.COMMON.graveEntryCount.get()) {
+            entries.removeLast();
+        }
+        entries.addFirst(entry);
+        this.markDirty();
+    }
+
+    public void clearGraveEntries(PlayerEntity player) {
+        this.playerGraveEntries.remove(player.getUniqueID());
+        this.markDirty();
+    }
+
+
 
     @Override
     public CompoundNBT write(CompoundNBT compound) {
@@ -62,10 +90,14 @@ public class WorldGraveData extends WorldSavedData {
             CompoundNBT playerGravesNBT = (CompoundNBT) inbt;
             UUID uuid = playerGravesNBT.getUniqueId("UUID");
             ListNBT entriesNBT = playerGravesNBT.getList("Entries", Constants.NBT.TAG_COMPOUND);
-            for (INBT inbt1 : entriesNBT) {
-                CompoundNBT entryNBT = (CompoundNBT) inbt1;
+            for (int i = 0; i < entriesNBT.size(); i++) {
+                // Do not load more than the configs allow
+                if (i == GraveConfigs.COMMON.graveEntryCount.get())
+                    break;
+
+                CompoundNBT entryNBT = entriesNBT.getCompound(i);
                 PlayerGraveEntry entry = new PlayerGraveEntry(entryNBT);
-                this.playerGraveEntries.put(uuid, entry);
+                this.playerGraveEntries.computeIfAbsent(uuid, k -> new LinkedList<>()).addFirst(entry);
             }
         }
         ListNBT restoredGravesNBT = nbt.getList("RestoredGraves", Constants.NBT.TAG_COMPOUND);
@@ -74,31 +106,4 @@ public class WorldGraveData extends WorldSavedData {
             this.restoredGraves.add(restoredGraveUUID);
         }
     }
-
-    public void setGraveRestored(UUID graveUUID) {
-        this.restoredGraves.add(graveUUID);
-        this.markDirty();
-    }
-
-    public void removeGraveRestored(UUID graveUUID) {
-        this.restoredGraves.remove(graveUUID);
-        this.markDirty();
-    }
-
-    public boolean isGraveRestored(UUID graveUUID) {
-        return this.restoredGraves.contains(graveUUID);
-    }
-
-    public void addGraveEntry(PlayerEntity player, UUID graveUUID, PlayerGraveEntry entry) {
-        this.playerGraveEntries.put(player.getUniqueID(), entry);
-        // TODO check the max amount of graves per player
-        this.markDirty();
-    }
-
-    public void clearGraveEntries(PlayerEntity player) {
-        this.playerGraveEntries.removeAll(player.getUniqueID());
-        this.markDirty();
-    }
-
-
 }

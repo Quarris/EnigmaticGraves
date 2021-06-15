@@ -115,10 +115,14 @@ public class GraveManager {
             }
         }
 
+        playerInvData.addRemaining(drops);
         entry.dataList = dataList;
     }
 
     public static void setGraveRestored(UUID player, GraveEntity grave) {
-        getWorldGraveData(grave.world).getGraveEntriesForPlayer(player).stream().filter(entry -> entry.graveUUID.equals(grave.getUniqueID())).findFirst().ifPresent(PlayerGraveEntry::setRestored);
+        getWorldGraveData(grave.world).getGraveEntriesForPlayer(player).stream()
+                .filter(entry -> entry.graveUUID.equals(grave.getUniqueID()))
+                .findFirst()
+                .ifPresent(PlayerGraveEntry::setRestored);
     }
 }

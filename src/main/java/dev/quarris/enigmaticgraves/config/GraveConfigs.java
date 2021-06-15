@@ -19,6 +19,7 @@ public class GraveConfigs {
     public static class Common {
 
         public EnumValue<ExperienceHandling> experienceGraveHandling;
+        public IntValue graveEntryCount;
 
         public Common(Builder builder) {
             this.experienceGraveHandling = builder.comment(
@@ -28,6 +29,11 @@ public class GraveConfigs {
                     "KEEP_VANILLA: Stores the same amount of xp that would've been dropped normally into the grave.",
                     "KEEP_ALL: Stores all the players xp in the graves to restore it."
             ).defineEnum("experienceHandling", ExperienceHandling.DROP);
+
+            this.graveEntryCount = builder.comment(
+                    "Defines the amount of entries per player that can be stored to retrieve using commands.",
+                    "Once the entry count overflows, the oldest entries will be removed."
+            ).defineInRange("graveEntryCount", 10, 1, 99);
         }
 
         public enum ExperienceHandling {

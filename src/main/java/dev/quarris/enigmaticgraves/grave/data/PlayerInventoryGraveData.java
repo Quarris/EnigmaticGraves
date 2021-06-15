@@ -4,9 +4,11 @@ import dev.quarris.enigmaticgraves.utils.ModRef;
 import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 
@@ -17,6 +19,7 @@ public class PlayerInventoryGraveData implements IGraveData {
 
     public static final ResourceLocation NAME = ModRef.res("player_inventory");
     private ListNBT data;
+    private NonNullList<ItemStack> remainingItems;
 
     public PlayerInventoryGraveData(PlayerInventory inventory, Collection<ItemStack> drops) {
         PlayerInventory graveInv = new PlayerInventory(inventory.player);
@@ -47,6 +50,10 @@ public class PlayerInventoryGraveData implements IGraveData {
         this.deserializeNBT(nbt);
     }
 
+    public void addRemaining(Collection<ItemStack> remaining) {
+        this.remainingItems = NonNullList.from(ItemStack.EMPTY, remaining.toArray(new ItemStack[0]));
+    }
+
     @Override
     public void restore(PlayerEntity player) {
         PlayerInventory highPriority = new PlayerInventory(player);
@@ -66,17 +73,32 @@ public class PlayerInventoryGraveData implements IGraveData {
                 player.inventory.addItemStackToInventory(item);
             }
         }
+
+        if (this.remainingItems != null) {
+            for (ItemStack remainingStack : this.remainingItems) {
+                player.inventory.addItemStackToInventory(remainingStack);
+            }
+        }
     }
 
     @Override
     public CompoundNBT write(CompoundNBT nbt) {
         nbt.put("Data", this.data);
+        if (this.remainingItems != null) {
+            nbt.putInt("RemainingSize", this.remainingItems.size());
+            nbt.put("Remaining", ItemStackHelper.saveAllItems(new CompoundNBT(), this.remainingItems));
+        }
         return nbt;
     }
 
     @Override
     public void read(CompoundNBT nbt) {
         this.data = nbt.getList("Data", Constants.NBT.TAG_COMPOUND);
+        if (nbt.contains("Remaining")) {
+            int size = nbt.getInt("RemainingSize");
+            this.remainingItems = NonNullList.withSize(size, ItemStack.EMPTY);
+            ItemStackHelper.loadAllItems(nbt.getCompound("Remaining"), this.remainingItems);
+        }
     }
 
     @Override

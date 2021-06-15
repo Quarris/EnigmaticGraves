@@ -17,7 +17,7 @@ import net.minecraft.command.arguments.SuggestionProviders;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.StringTextComponent;
 
-import java.util.List;
+import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
@@ -60,7 +60,10 @@ public class GraveEntryType implements ArgumentType<Integer> {
         if (context.getSource() instanceof CommandSource) {
             try {
                 ServerPlayerEntity player = ((CommandSource) context.getSource()).asPlayer();
-                List<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.world).getGraveEntriesForPlayer(player.getUniqueID());
+                LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.world).getGraveEntriesForPlayer(player.getUniqueID());
+                if (entries == null) {
+                    return Suggestions.empty();
+                }
                 for (int i = 0; i < entries.size(); i++) {
                     PlayerGraveEntry entry = entries.get(i);
                     builder.suggest(entry.getEntryName(i));
