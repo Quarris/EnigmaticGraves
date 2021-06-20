@@ -2,18 +2,24 @@ package dev.quarris.enigmaticgraves.grave;
 
 import dev.quarris.enigmaticgraves.compat.CompatManager;
 import dev.quarris.enigmaticgraves.compat.CurioCompat;
-import dev.quarris.enigmaticgraves.grave.data.CurioGraveData;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.config.GraveConfigs.Common.ExperienceHandling;
 import dev.quarris.enigmaticgraves.content.GraveEntity;
+import dev.quarris.enigmaticgraves.grave.data.CurioGraveData;
 import dev.quarris.enigmaticgraves.grave.data.ExperienceGraveData;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import dev.quarris.enigmaticgraves.grave.data.PlayerInventoryGraveData;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.pattern.BlockPattern;
+import net.minecraft.block.pattern.BlockPatternBuilder;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -29,6 +35,13 @@ public class GraveManager {
     public static final HashMap<ResourceLocation, Function<CompoundNBT, IGraveData>> GRAVE_DATA_SUPPLIERS = new HashMap<>();
     public static final HashMap<UUID, PlayerGraveEntry> LATEST_GRAVE_ENTRY = new HashMap<>();
     public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
+
+    private static final BlockPattern VALID_PLACE = BlockPatternBuilder.start()
+            .aisle("A", // Air
+                    "A", // Air
+                    "B") // Block
+            .where('A', b -> !b.getBlockState().getMaterial().blocksMovement())
+            .where('B', b -> b.getBlockState().getMaterial().blocksMovement()).build();
 
     public static void init() {
         GRAVE_DATA_SUPPLIERS.put(PlayerInventoryGraveData.NAME, PlayerInventoryGraveData::new);
@@ -79,7 +92,7 @@ public class GraveManager {
         GraveEntity grave = GraveEntity.createGrave(player, entry.dataList);
         entry.graveUUID = grave.getUniqueID();
         player.world.addEntity(grave);
-        worldData.addGraveEntry(player, grave.getUniqueID(), entry);
+        worldData.addGraveEntry(player.getUniqueID(), entry);
 
         LATEST_GRAVE_ENTRY.remove(player.getUniqueID());
     }
@@ -124,5 +137,67 @@ public class GraveManager {
                 .filter(entry -> entry.graveUUID.equals(grave.getUniqueID()))
                 .findFirst()
                 .ifPresent(PlayerGraveEntry::setRestored);
+    }
+
+    /**
+     * Finds a position to spawn the grave at.
+     * @param outPos The block position to place the grave at.
+     * @return true to also spawn a block below the grave.
+     */
+    public static boolean getSpawnPosition(World world, Vector3d deathPos, BlockPos.Mutable outPos) {
+        GraveConfigs.Common configs = GraveConfigs.COMMON;
+
+
+        // First, try to find the first non-air block below the death point
+        // and return the air block above that.
+        for (BlockPos.Mutable pos = new BlockPos(deathPos).toMutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
+            BlockPos belowPos = new BlockPos(pos).down();
+            BlockState belowState = world.getBlockState(belowPos);
+            if (blocksMovement(belowState)) {
+                outPos.setPos(pos);
+                return false;
+            }
+        }
+
+        // If there are no non-air blocks below the death point,
+        // then scan the range around the backup position
+        BlockPos pos = new BlockPos(deathPos.x, configs.scanHeight.get(), deathPos.z);
+        for (int scan = 0; scan < configs.scanRange.get(); scan++) {
+            // First check above the scan
+            BlockPos scanPos = new BlockPos(pos).up(scan);
+            if (!blocksMovement(world.getBlockState(scanPos.up())) &&
+                !blocksMovement(world.getBlockState(scanPos)) &&
+                 blocksMovement(world.getBlockState(scanPos.down()))) {
+
+                outPos.setPos(scanPos);
+                return false;
+            }
+
+            if (scan > 0) {
+                // Else check below the scan
+                scanPos = new BlockPos(pos).down(scan);
+                if (!blocksMovement(world.getBlockState(scanPos.up())) &&
+                    !blocksMovement(world.getBlockState(scanPos)) &&
+                     blocksMovement(world.getBlockState(scanPos.down()))) {
+
+                    outPos.setPos(scanPos);
+                    return false;
+                }
+            }
+        }
+
+        // The scan is filled with air
+        if (!blocksMovement(world.getBlockState(pos)) && !blocksMovement(world.getBlockState(pos.up()))) {
+            outPos.setPos(pos);
+            return true;
+        }
+
+        // If no position was selected, drop the grave at the bottom
+        outPos.setPos(deathPos.x, 1, deathPos.z);
+        return true;
+    }
+
+    private static boolean blocksMovement(BlockState state) {
+        return state.getMaterial().blocksMovement();
     }
 }

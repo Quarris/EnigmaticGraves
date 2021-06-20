@@ -1,8 +1,14 @@
 package dev.quarris.enigmaticgraves.content;
 
+import dev.quarris.enigmaticgraves.EnigmaticGraves;
+import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import dev.quarris.enigmaticgraves.setup.Registry;
+import dev.quarris.enigmaticgraves.utils.ModRef;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -17,9 +23,12 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -35,7 +44,22 @@ public class GraveEntity extends Entity {
 
     public static GraveEntity createGrave(PlayerEntity player, List<IGraveData> graveData) {
         GraveEntity grave = new GraveEntity(player);
-        grave.setPositionAndUpdate(player.getPosX(), player.getPosY(), player.getPosZ());
+        BlockPos.Mutable spawnPos = new BlockPos.Mutable();
+        boolean spawnBlockBelow = GraveManager.getSpawnPosition(player.world, player.getPositionVec(), spawnPos);
+        if (spawnBlockBelow) {
+            ResourceLocation blockName = new ResourceLocation(GraveConfigs.COMMON.graveFloorBlock.get());
+            BlockState state = Blocks.DIRT.getDefaultState();
+            if (ForgeRegistries.BLOCKS.containsKey(blockName)) {
+                // TODO do this check during config load
+                state = ForgeRegistries.BLOCKS.getValue(blockName).getDefaultState();
+            } else {
+                ModRef.LOGGER.warn("Could not find block with name " + blockName + " to spawn under the grave. Defaulting to dirt.");
+            }
+
+            player.world.setBlockState(spawnPos.down(), state, 3);
+            player.world.playEvent(2001, spawnPos, Block.getStateId(state));
+        }
+        grave.setPositionAndUpdate(spawnPos.getX() + player.getWidth() / 2, spawnPos.getY(), spawnPos.getZ() + player.getWidth() / 2);
         grave.setContents(graveData);
         return grave;
     }
