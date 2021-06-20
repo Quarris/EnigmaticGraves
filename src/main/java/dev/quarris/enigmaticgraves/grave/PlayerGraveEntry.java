@@ -6,6 +6,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
@@ -21,6 +23,7 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
     public PlayerInventory inventory;
     // Holds the UUID of the grave entity that this entry belongs to
     public UUID graveUUID;
+    public BlockPos gravePos;
     public Date timestamp;
     public List<IGraveData> dataList = new ArrayList<>();
 

@@ -1,6 +1,5 @@
 package dev.quarris.enigmaticgraves.content;
 
-import dev.quarris.enigmaticgraves.EnigmaticGraves;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
@@ -10,9 +9,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.material.PushReaction;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -24,7 +26,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -85,6 +86,32 @@ public class GraveEntity extends Entity {
     }
 
     @Override
+    public boolean isGlowing() {
+        if (this.world.isRemote && this.getOwner() != null && this.getOwnerUUID().equals(Minecraft.getInstance().player.getUniqueID())) {
+            PlayerEntity player = this.getOwner();
+            // Try to find the grave item in one of the hands, prioritising the main hand
+            ItemStack stack = null;
+            if (player.getHeldItemMainhand().getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
+                stack = player.getHeldItemMainhand();
+            }
+            if (stack == null && player.getHeldItemOffhand().getItem() != Registry.GRAVE_FINDER_ITEM.get()) {
+                stack = player.getHeldItemOffhand();
+            }
+
+            if (stack == null)
+                return false;
+
+            if (!stack.hasTag() || !stack.getTag().contains("GraveUUID"))
+                return false;
+
+            UUID graveUUID = stack.getTag().getUniqueId("GraveUUID");
+            if (this.getUniqueID().equals(graveUUID))
+                return true;
+        }
+        return super.isGlowing();
+    }
+
+    @Override
     public PushReaction getPushReaction() {
         return PushReaction.IGNORE;
     }
@@ -116,6 +143,22 @@ public class GraveEntity extends Entity {
     private void restoreGrave(PlayerEntity player) {
         if (!this.isAlive() || this.world.isRemote)
             return;
+
+        // Remove the corresponding grave finder from the player inventory
+        for (int slot = 0; slot < player.inventory.getSizeInventory(); slot++) {
+            ItemStack stack = player.inventory.getStackInSlot(slot);
+            if (stack.getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
+                if (stack.hasTag()) {
+                    CompoundNBT nbt = stack.getTag();
+                    if (nbt != null && nbt.contains("GraveUUID")) {
+                        if (nbt.getUniqueId("GraveUUID").equals(this.getUniqueID())) {
+                            player.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
         for (IGraveData data : this.contents) {
             data.restore(player);

@@ -3,6 +3,7 @@ package dev.quarris.enigmaticgraves.content;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -15,7 +16,7 @@ import java.util.function.Function;
 
 public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
 
-    private GraveModel model = new GraveModel(RenderType::getEntityCutout);
+    private GraveModel model = new GraveModel(RenderType::getEntityCutoutNoCull);
     private static final ResourceLocation TEX = new ResourceLocation("textures/painting/back.png");
 
     public GraveEntityRenderer(EntityRendererManager renderManager) {
@@ -25,7 +26,11 @@ public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
     @Override
     public void render(GraveEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-        model.render(matrixStackIn, bufferIn.getBuffer(this.model.getRenderType(this.getEntityTexture(entityIn))), packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+        model.render(matrixStackIn, bufferIn.getBuffer(this.getRenderType(entityIn)), packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+    }
+
+    private RenderType getRenderType(GraveEntity entity) {
+        return this.model.getRenderType(this.getEntityTexture(entity));
     }
 
     @Override

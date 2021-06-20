@@ -91,6 +91,7 @@ public class GraveManager {
         PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUniqueID());
         GraveEntity grave = GraveEntity.createGrave(player, entry.dataList);
         entry.graveUUID = grave.getUniqueID();
+        entry.gravePos = grave.getPosition();
         player.world.addEntity(grave);
         worldData.addGraveEntry(player.getUniqueID(), entry);
 
