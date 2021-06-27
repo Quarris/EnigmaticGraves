@@ -2,6 +2,7 @@ package dev.quarris.enigmaticgraves.grave.data;
 
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.ItemStackHelper;
@@ -70,13 +71,17 @@ public class PlayerInventoryGraveData implements IGraveData {
                 continue;
 
             if (!PlayerInventoryExtensions.addItemToPlayerInventory(player.inventory, slot, item)) {
-                player.inventory.addItemStackToInventory(item);
+                ItemEntity itemEntity = player.entityDropItem(item);
+                itemEntity.setMotion(0, 0, 0);
+                itemEntity.velocityChanged = true;
             }
         }
 
         if (this.remainingItems != null) {
             for (ItemStack remainingStack : this.remainingItems) {
-                player.inventory.addItemStackToInventory(remainingStack);
+                if (!player.inventory.addItemStackToInventory(remainingStack)) {
+                    player.entityDropItem(remainingStack);
+                }
             }
         }
     }
