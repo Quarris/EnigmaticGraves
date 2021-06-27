@@ -21,7 +21,7 @@ public class Registry {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, ModRef.ID);
 
     public static final RegistryObject<Item> GRAVE_FINDER_ITEM = ITEMS.register("grave_finder", GraveFinderItem::new);
-    public static final RegistryObject<EntityType<GraveEntity>> GRAVE_ENTITY_TYPE = ENTITIES.register("grave", () -> EntityType.Builder.<GraveEntity>create(GraveEntity::new, EntityClassification.MISC).size(0.6f, 1f).immuneToFire().func_225435_d().build("grave"));
+    public static final RegistryObject<EntityType<GraveEntity>> GRAVE_ENTITY_TYPE = ENTITIES.register("grave", () -> EntityType.Builder.<GraveEntity>create(GraveEntity::new, EntityClassification.MISC).size(14/16f, 14/16f).immuneToFire().func_225435_d().build("grave"));
 
 
     public static void init() {

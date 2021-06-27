@@ -147,8 +147,6 @@ public class GraveManager {
      */
     public static boolean getSpawnPosition(World world, Vector3d deathPos, BlockPos.Mutable outPos) {
         GraveConfigs.Common configs = GraveConfigs.COMMON;
-
-
         // First, try to find the first non-air block below the death point
         // and return the air block above that.
         for (BlockPos.Mutable pos = new BlockPos(deathPos).toMutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {

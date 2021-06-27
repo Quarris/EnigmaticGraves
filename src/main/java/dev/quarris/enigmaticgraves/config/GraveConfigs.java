@@ -1,7 +1,9 @@
 package dev.quarris.enigmaticgraves.config;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.tuple.Pair;
 
 import static net.minecraftforge.common.ForgeConfigSpec.*;
@@ -44,16 +46,28 @@ public class GraveConfigs {
             ).defineInRange("graveEntryCount", 10, 1, 99);
             builder.pop();
 
-            builder.comment("Grave Spawn Positioning").push("position");
+            builder.comment(
+                    "Grave Spawn Place Handling",
+                    "The grave will first scan down from the death position until it finds a solid block to place the grave on.",
+                    "If there is no solid block below the death position, it will attempt to scan from the 'scanHeight' value",
+                    "It will scan up to +-'scanRange' in attempt to find a solid block with 2 air blocks above it to spawn the grave on.",
+                    "If it fails to find a place, it will then either: ",
+                    "   - Place a block at y=1 with the grave on top, if the 'scanHeight' were filled with block",
+                    "   - Place a block at y='scanHeight' with the grave on top, if the 'scanHeight' were filled with air"
+            ).push("position");
             this.scanHeight = builder.comment(
                     "The scanning start position for a valid place to spawn"
             ).defineInRange("scanHeight", 60, 0, 255);
-            this.graveFloorBlock = builder.comment(
-                    "The block that should spawn below the grave if there is none"
-            ).define("floorBlock", Blocks.DIRT.getRegistryName().toString());
             this.scanRange = builder.comment(
                     "The vertical range (up/down) from the initial position to scan for a valid spot to place a grave"
             ).defineInRange("scanRange", 10, 0, 255);
+            this.graveFloorBlock = builder.comment(
+                    "The block that should spawn below the grave if there is none"
+            ).define("floorBlock", Blocks.DIRT.getRegistryName().toString(), obj -> {
+                if (!(obj instanceof String))
+                    return false;
+                return ForgeRegistries.BLOCKS.containsKey(new ResourceLocation(obj.toString()));
+            });
             builder.pop();
         }
 

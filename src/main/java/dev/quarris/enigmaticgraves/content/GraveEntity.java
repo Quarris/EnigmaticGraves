@@ -49,17 +49,11 @@ public class GraveEntity extends Entity {
         boolean spawnBlockBelow = GraveManager.getSpawnPosition(player.world, player.getPositionVec(), spawnPos);
         if (spawnBlockBelow) {
             ResourceLocation blockName = new ResourceLocation(GraveConfigs.COMMON.graveFloorBlock.get());
-            BlockState state = Blocks.DIRT.getDefaultState();
-            if (ForgeRegistries.BLOCKS.containsKey(blockName)) {
-                // TODO do this check during config load
-                state = ForgeRegistries.BLOCKS.getValue(blockName).getDefaultState();
-            } else {
-                ModRef.LOGGER.warn("Could not find block with name " + blockName + " to spawn under the grave. Defaulting to dirt.");
-            }
-
+            BlockState state = ForgeRegistries.BLOCKS.getValue(blockName).getDefaultState();
             player.world.setBlockState(spawnPos.down(), state, 3);
             player.world.playEvent(2001, spawnPos, Block.getStateId(state));
         }
+        grave.setRotation(player.rotationYaw, 0);
         grave.setPositionAndUpdate(spawnPos.getX() + player.getWidth() / 2, spawnPos.getY(), spawnPos.getZ() + player.getWidth() / 2);
         grave.setContents(graveData);
         return grave;
