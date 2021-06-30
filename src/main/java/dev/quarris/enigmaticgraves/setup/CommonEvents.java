@@ -18,6 +18,7 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.LinkedList;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = ModRef.ID)
@@ -38,7 +39,12 @@ public class CommonEvents {
             return;
 
         ItemStack graveFinder = new ItemStack(Registry.GRAVE_FINDER_ITEM.get());
-        PlayerGraveEntry latestEntry = GraveManager.getWorldGraveData(event.getPlayer().world).getGraveEntriesForPlayer(event.getPlayer().getUniqueID()).getFirst();
+        LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(event.getPlayer().world).getGraveEntriesForPlayer(event.getPlayer().getUniqueID());
+
+        if (entries == null || entries.isEmpty())
+            return;
+
+        PlayerGraveEntry latestEntry = entries.getFirst();
         CompoundNBT nbt = graveFinder.getOrCreateTag();
         nbt.put("Pos", NBTUtil.writeBlockPos(latestEntry.gravePos));
         nbt.putUniqueId("GraveUUID", latestEntry.graveUUID);
