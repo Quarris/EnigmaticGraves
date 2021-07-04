@@ -5,6 +5,7 @@ import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -48,19 +49,21 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putUniqueId("Grave", this.graveUUID);
+        nbt.put("Pos", NBTUtil.writeBlockPos(this.gravePos));
         nbt.putLong("Timestamp", this.timestamp.getTime());
         ListNBT dataNBT = new ListNBT();
         for (IGraveData data : this.dataList) {
             dataNBT.add(data.serializeNBT());
         }
         nbt.put("Data", dataNBT);
-
+        nbt.putBoolean("Restored", this.restored);
         return nbt;
     }
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
         this.graveUUID = nbt.getUniqueId("Grave");
+        this.gravePos = NBTUtil.readBlockPos(nbt.getCompound("Pos"));
         this.timestamp = new Date(nbt.getLong("Timestamp"));
         ListNBT dataNBT = nbt.getList("Data", Constants.NBT.TAG_COMPOUND);
         for (INBT inbt : dataNBT) {
@@ -69,6 +72,7 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
             IGraveData data = GraveManager.GRAVE_DATA_SUPPLIERS.get(name).apply(graveNBT);
             this.dataList.add(data);
         }
+        this.restored = nbt.getBoolean("Restored");
     }
 
     public void setRestored() {

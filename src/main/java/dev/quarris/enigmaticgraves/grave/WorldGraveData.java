@@ -88,10 +88,11 @@ public class WorldGraveData extends WorldSavedData {
             CompoundNBT playerGravesNBT = (CompoundNBT) inbt;
             UUID uuid = playerGravesNBT.getUniqueId("UUID");
             ListNBT entriesNBT = playerGravesNBT.getList("Entries", Constants.NBT.TAG_COMPOUND);
+            LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(uuid, k -> new LinkedList<>());
             for (int i = 0; i < entriesNBT.size(); i++) {
                 CompoundNBT entryNBT = entriesNBT.getCompound(i);
                 PlayerGraveEntry entry = new PlayerGraveEntry(entryNBT);
-                this.addGraveEntry(uuid, entry);
+                entries.addLast(entry);
             }
         }
         ListNBT restoredGravesNBT = nbt.getList("RestoredGraves", Constants.NBT.TAG_COMPOUND);
