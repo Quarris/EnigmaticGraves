@@ -70,11 +70,7 @@ public class PlayerInventoryGraveData implements IGraveData {
             if (item.isEmpty())
                 continue;
 
-            if (!PlayerInventoryExtensions.addItemToPlayerInventory(player.inventory, slot, item)) {
-                ItemEntity itemEntity = player.entityDropItem(item);
-                itemEntity.setMotion(0, 0, 0);
-                itemEntity.velocityChanged = true;
-            }
+            PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, item);
         }
 
         if (this.remainingItems != null) {

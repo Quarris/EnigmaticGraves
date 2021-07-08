@@ -1,6 +1,7 @@
 package dev.quarris.enigmaticgraves.grave.data;
 
 import dev.quarris.enigmaticgraves.utils.ModRef;
+import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
@@ -74,13 +75,13 @@ public class CurioGraveData implements IGraveData {
                     // If the curios slots have shrunk since last time,
                     // then add the grave items to the player inventory instead
                     if (slot >= stacks.getSlots()) {
-                        player.inventory.addItemStackToInventory(graveItems.get(slot));
+                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, graveItems.get(slot));
                     }
 
                     ItemStack old = stacks.getStacks().getStackInSlot(slot);
                     stacks.getStacks().setStackInSlot(slot, graveItems.get(slot));
                     if (!old.isEmpty()) {
-                        player.inventory.addItemStackToInventory(old);
+                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, old);
                     }
                 }
             }
@@ -91,13 +92,13 @@ public class CurioGraveData implements IGraveData {
                     // If the curios slots have shrunk since last time,
                     // then add the grave items to the player inventory instead
                     if (slot >= stacks.getSlots()) {
-                        player.inventory.addItemStackToInventory(graveItems.get(slot));
+                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, graveItems.get(slot));
                     }
 
                     ItemStack old = stacks.getCosmeticStacks().getStackInSlot(slot);
                     stacks.getCosmeticStacks().setStackInSlot(slot, graveItems.get(slot));
                     if (!old.isEmpty()) {
-                        player.inventory.addItemStackToInventory(old);
+                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, old);
                     }
                 }
             }
