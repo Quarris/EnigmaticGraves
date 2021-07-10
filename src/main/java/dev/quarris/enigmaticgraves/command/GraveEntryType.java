@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 
 public class GraveEntryType implements ArgumentType<Integer> {
 
-    private static final Pattern PATTERN = Pattern.compile("death_(\\d){1,3}.+");
+    private static final Pattern PATTERN = Pattern.compile("death_(\\d){1,3}.*");
 
     public static PlayerGraveEntry getEntry(UUID playerUUID, CommandContext<CommandSource> context, String name) {
         int deathId = context.getArgument(name, Integer.class);
