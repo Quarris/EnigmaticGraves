@@ -48,6 +48,7 @@ public class RestoreGraveCommand {
         "/enigmatic_graves <player> restore [death_<id> [forced]]"
     );
 
+
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         LiteralCommandNode<CommandSource> cmd = dispatcher
             .register(Commands.literal("enigmatic_graves")
@@ -60,6 +61,10 @@ public class RestoreGraveCommand {
                     .then(Commands.literal("list").executes(ctx -> {
                         ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
                         List<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(ctx.getSource().getWorld()).getGraveEntriesForPlayer(player.getUniqueID());
+                        if (entries == null) {
+                            ctx.getSource().sendFeedback(new StringTextComponent("The player has no deaths."), false);
+                            return 0;
+                        }
                         StringBuilder sb = new StringBuilder();
                         for (int i = 0; i < entries.size(); i++) {
                             sb.append(entries.get(i).getEntryName(i));
@@ -82,7 +87,9 @@ public class RestoreGraveCommand {
                     .then(Commands.literal("clear")
                         .executes(ctx -> {
                             ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
+                            int count = GraveManager.getWorldGraveData(player.world).getGraveEntriesForPlayer(player.getUniqueID()).size();
                             GraveManager.getWorldGraveData(player.world).clearGraveEntries(player);
+                            ctx.getSource().sendFeedback(new StringTextComponent("Cleared " + count + " entries."), true);
                             return 0;
                         }))));
 

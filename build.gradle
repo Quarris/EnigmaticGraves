@@ -22,7 +22,7 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.4'
+version = '1.4.2'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -94,7 +94,7 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.25'
+    minecraft 'net.minecraftforge:forge:1.16.5-36.1.32'
     compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1:api")
     if (System.getProperty("idea.sync.active") != "true") {

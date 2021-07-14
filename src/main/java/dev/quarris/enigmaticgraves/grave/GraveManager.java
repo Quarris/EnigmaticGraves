@@ -9,6 +9,7 @@ import dev.quarris.enigmaticgraves.grave.data.CurioGraveData;
 import dev.quarris.enigmaticgraves.grave.data.ExperienceGraveData;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import dev.quarris.enigmaticgraves.grave.data.PlayerInventoryGraveData;
+import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.BlockPattern;
 import net.minecraft.block.pattern.BlockPatternBuilder;
@@ -68,9 +69,12 @@ public class GraveManager {
     }
 
     public static void prepPlayerGrave(PlayerEntity player) {
-        if (!shouldSpawnGrave(player))
+        if (!shouldSpawnGrave(player)) {
+            ModRef.LOGGER.info("Cannot spawn grave. Player is spectator is the KEEP_INVENTORY gamerule is enabled");
             return;
+        }
 
+        ModRef.LOGGER.info("Preparing grave for " + player.getName().getString());
         PlayerGraveEntry entry = new PlayerGraveEntry(player.inventory);
         LATEST_GRAVE_ENTRY.put(player.getUniqueID(), entry);
     }
@@ -79,6 +83,7 @@ public class GraveManager {
         if (!LATEST_GRAVE_ENTRY.containsKey(player.getUniqueID()))
             return;
 
+        ModRef.LOGGER.debug("Populating grave for " + player.getName().getString());
         PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUniqueID());
         generateGraveDataList(player, entry, drops);
     }
@@ -87,13 +92,17 @@ public class GraveManager {
         if (!LATEST_GRAVE_ENTRY.containsKey(player.getUniqueID()))
             return;
 
+        ModRef.LOGGER.debug("Attempting to spawn grave for " + player.getName().getString());
         WorldGraveData worldData = getWorldGraveData(player.world);
         PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUniqueID());
         GraveEntity grave = GraveEntity.createGrave(player, entry.dataList);
         entry.graveUUID = grave.getUniqueID();
         entry.gravePos = grave.getPosition();
-        player.world.addEntity(grave);
-        worldData.addGraveEntry(player.getUniqueID(), entry);
+        if (!player.world.addEntity(grave)) {
+            ModRef.LOGGER.info("Could not spawn grave for " + player.getName().getString());
+        }
+        worldData.addGraveEntry(player, entry);
+        ModRef.LOGGER.info("Added grave entry to player " + player.getName().getString());
 
         LATEST_GRAVE_ENTRY.remove(player.getUniqueID());
     }

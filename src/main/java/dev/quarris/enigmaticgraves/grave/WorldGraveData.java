@@ -1,12 +1,12 @@
 package dev.quarris.enigmaticgraves.grave;
 
-import com.google.common.collect.LinkedListMultimap;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.*;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.world.storage.WorldSavedData;
 import net.minecraftforge.common.util.Constants;
 
@@ -41,9 +41,11 @@ public class WorldGraveData extends WorldSavedData {
         return this.restoredGraves.contains(graveUUID);
     }
 
-    public void addGraveEntry(UUID playerUUID, PlayerGraveEntry entry) {
-        LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(playerUUID, k -> new LinkedList<>());
+    public void addGraveEntry(PlayerEntity player, PlayerGraveEntry entry) {
+        LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(player.getUniqueID(), k -> new LinkedList<>());
         if (entries.size() >= GraveConfigs.COMMON.graveEntryCount.get()) {
+            ModRef.LOGGER.debug("Entries reached max values for " + player.getName());
+            ModRef.LOGGER.debug("Removing oldest entry");
             entries.removeLast();
         }
         entries.addFirst(entry);
