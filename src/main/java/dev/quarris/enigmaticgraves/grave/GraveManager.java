@@ -93,6 +93,8 @@ public class GraveManager {
         entry.gravePos = grave.getPosition();
         if (!player.world.addEntity(grave)) {
             ModRef.LOGGER.info("Could not spawn grave for " + player.getName().getString());
+        } else {
+            ModRef.LOGGER.info("Spawned grave for " + player.getName().getString() + " at " + grave.getPosition());
         }
         worldData.addGraveEntry(player, entry);
         ModRef.LOGGER.info("Added grave entry to player " + player.getName().getString());
