@@ -1,6 +1,7 @@
 package dev.quarris.enigmaticgraves.setup;
 
 import dev.quarris.enigmaticgraves.command.RestoreGraveCommand;
+import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.content.GraveEntity;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.PlayerGraveEntry;
@@ -34,8 +35,11 @@ public class CommonEvents {
     }
 
     @SubscribeEvent
-    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+    public static void spawnGraveFinder(PlayerEvent.PlayerRespawnEvent event) {
         if (event.isEndConquered())
+            return;
+
+        if (!GraveConfigs.COMMON.spawnGraveFinder.get())
             return;
 
         ItemStack graveFinder = new ItemStack(Registry.GRAVE_FINDER_ITEM.get());

@@ -21,6 +21,9 @@ public class GraveConfigs {
 
     public static class Common {
 
+        // Misc
+        public BooleanValue spawnGraveFinder;
+
         // Data
         public EnumValue<ExperienceHandling> experienceGraveHandling;
         public IntValue graveEntryCount;
@@ -31,6 +34,11 @@ public class GraveConfigs {
         public IntValue scanRange;    // Scan range (+- from start height)
 
         public Common(Builder builder) {
+            builder.comment("Misc Options").push("misc");
+            this.spawnGraveFinder = builder.comment(
+                "Should you get a grave finder item after you respawn?"
+            ).define("spawnGraveFinder", true);
+            builder.pop();
             builder.comment("How the grave data is handled").push("data");
             this.experienceGraveHandling = builder.comment(
                     "Defines how the experience should be handled when the player dies.",

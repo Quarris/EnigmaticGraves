@@ -85,14 +85,14 @@ public class GraveManager {
         if (!LATEST_GRAVE_ENTRY.containsKey(player.getUniqueID()))
             return;
 
-        ModRef.LOGGER.debug("Attempting to spawn grave for " + player.getName().getString());
         WorldGraveData worldData = getWorldGraveData(player.world);
         PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUniqueID());
         GraveEntity grave = GraveEntity.createGrave(player, entry.dataList);
+        ModRef.LOGGER.debug("Attempting to spawn grave for " + player.getName().getString() + " at " + grave.getPosition());
         entry.graveUUID = grave.getUniqueID();
         entry.gravePos = grave.getPosition();
         if (!player.world.addEntity(grave)) {
-            ModRef.LOGGER.info("Could not spawn grave for " + player.getName().getString());
+            ModRef.LOGGER.warn("Could not spawn grave for " + player.getName().getString());
         } else {
             ModRef.LOGGER.info("Spawned grave for " + player.getName().getString() + " at " + grave.getPosition());
         }
