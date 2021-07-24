@@ -89,6 +89,10 @@ repositories {
     maven {
         url = "https://maven.florens.be/"
     }
+    maven {
+        name = "Cursemaven"
+        url = "https://www.cursemaven.com/"
+    }
 
     flatDir { dirs 'mods' }
 }
@@ -100,13 +104,14 @@ dependencies {
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
     }
+    //compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
 
     // Testing Dependencies
-    runtimeOnly fg.deobf('unused:cofh_core-1.16.4:1.2.1')
-    runtimeOnly fg.deobf('unused:ensorcellation-1.16.4:1.2.0')
+    runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')
+    runtimeOnly fg.deobf('curse.maven:ensorcellation-349447:3246996')
     implementation fg.deobf("be.florens:expandability-forge:2.0.1")
-    runtimeOnly fg.deobf('unused:Artifacts-1.16.5:2.9.3')
-    //runtimeOnly fg.deobf('unused:CosmeticArmorReworked-1.16.5:v3a')
+    runtimeOnly fg.deobf('curse.maven:artifacts-312353:3374317')
+    //runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3398000')
 }
 
 jar {

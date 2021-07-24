@@ -72,6 +72,9 @@ public class CurioGraveData implements IGraveData {
                 ICurioStacksHandler stacks = curios.get(entry.getKey());
                 NonNullList<ItemStack> graveItems = entry.getValue();
                 for (int slot = 0; slot < graveItems.size(); slot++) {
+                    if (graveItems.get(slot).isEmpty()) // Dont replace empty items
+                        continue;
+
                     // If the curios slots have shrunk since last time,
                     // then add the grave items to the player inventory instead
                     if (slot >= stacks.getSlots()) {
@@ -89,6 +92,8 @@ public class CurioGraveData implements IGraveData {
                 ICurioStacksHandler stacks = curios.get(entry.getKey());
                 NonNullList<ItemStack> graveItems = entry.getValue();
                 for (int slot = 0; slot < graveItems.size(); slot++) {
+                    if (graveItems.get(slot).isEmpty()) // Dont replace empty items
+                        continue;
                     // If the curios slots have shrunk since last time,
                     // then add the grave items to the player inventory instead
                     if (slot >= stacks.getSlots()) {

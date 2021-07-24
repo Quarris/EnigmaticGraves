@@ -37,13 +37,6 @@ public class GraveManager {
     public static final HashMap<UUID, PlayerGraveEntry> LATEST_GRAVE_ENTRY = new HashMap<>();
     public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
-    private static final BlockPattern VALID_PLACE = BlockPatternBuilder.start()
-            .aisle("A", // Air
-                    "A", // Air
-                    "B") // Block
-            .where('A', b -> !b.getBlockState().getMaterial().blocksMovement())
-            .where('B', b -> b.getBlockState().getMaterial().blocksMovement()).build();
-
     public static void init() {
         GRAVE_DATA_SUPPLIERS.put(PlayerInventoryGraveData.NAME, PlayerInventoryGraveData::new);
         GRAVE_DATA_SUPPLIERS.put(ExperienceGraveData.NAME, ExperienceGraveData::new);
@@ -202,7 +195,7 @@ public class GraveManager {
 
         // If no position was selected, drop the grave at the bottom
         outPos.setPos(deathPos.x, 1, deathPos.z);
-        return true;
+        return !world.getBlockState(new BlockPos(deathPos.x, 0, deathPos.z)).getMaterial().blocksMovement();
     }
 
     private static boolean blocksMovement(BlockState state) {
