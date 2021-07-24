@@ -16,10 +16,7 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 public class CurioGraveData implements IGraveData {
 
@@ -34,20 +31,31 @@ public class CurioGraveData implements IGraveData {
             NonNullList<ItemStack> curioStacksList = NonNullList.withSize(curioItems.getSlots(), ItemStack.EMPTY);
             NonNullList<ItemStack> curioCosmeticStacksList = NonNullList.withSize(curioItems.getSlots(), ItemStack.EMPTY);
             Iterator<ItemStack> ite = drops.iterator();
+            Set<Integer> stackSlotsChecked = new HashSet<>();
+            Set<Integer> cosmeticStacksSlotsChecked = new HashSet<>();
+
             loop:
             while (ite.hasNext()) {
                 ItemStack drop = ite.next();
                 for (int slot = 0; slot < curioItems.getSlots(); slot++) {
+                    if (stackSlotsChecked.contains(slot))
+                        continue;
+
                     ItemStack stack = curioItems.getStacks().getStackInSlot(slot);
                     if (ItemStack.areItemStacksEqual(stack, drop)) {
+                        stackSlotsChecked.add(slot);
                         curioStacksList.set(slot, drop);
                         ite.remove();
                         continue loop;
                     }
                 }
                 for (int slot = 0; slot < curioItems.getSlots(); slot++) {
+                    if (cosmeticStacksSlotsChecked.contains(slot))
+                        continue;
+
                     ItemStack stack = curioItems.getCosmeticStacks().getStackInSlot(slot);
                     if (ItemStack.areItemStacksEqual(stack, drop)) {
+                        cosmeticStacksSlotsChecked.add(slot);
                         curioCosmeticStacksList.set(slot, drop);
                         ite.remove();
                         continue loop;
