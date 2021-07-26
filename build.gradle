@@ -22,7 +22,7 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.4.2'
+version = '1.5'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
