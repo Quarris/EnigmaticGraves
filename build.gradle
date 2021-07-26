@@ -83,10 +83,10 @@ minecraft {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    maven {
+    maven {  // CURIOS
         url = "https://maven.theillusivec4.top/"
     }
-    maven {
+    maven {  // ExpandAbility
         url = "https://maven.florens.be/"
     }
     maven {
@@ -94,16 +94,24 @@ repositories {
         url = "https://www.cursemaven.com/"
     }
 
+    maven { // TOP
+        name 'tterrag maven'
+        url "https://maven.tterrag.com/"
+    }
+    maven { url "https://maven.tehnut.info" } // HWYLA
+
     flatDir { dirs 'mods' }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.32'
-    compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1:api")
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
     }
+    minecraft 'net.minecraftforge:forge:1.16.5-36.1.32'
+    compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1:api")
+    compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
+    compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
     //compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
 
     // Testing Dependencies
@@ -111,6 +119,8 @@ dependencies {
     runtimeOnly fg.deobf('curse.maven:ensorcellation-349447:3246996')
     implementation fg.deobf("be.florens:expandability-forge:2.0.1")
     runtimeOnly fg.deobf('curse.maven:artifacts-312353:3374317')
+    runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22")
+
     //runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3398000')
 }
 

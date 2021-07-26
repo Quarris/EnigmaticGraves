@@ -3,6 +3,8 @@ package dev.quarris.enigmaticgraves.content;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 import dev.quarris.enigmaticgraves.utils.ModRef;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
@@ -12,10 +14,15 @@ import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import java.util.function.Function;
 
+@OnlyIn(Dist.CLIENT)
 public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
 
     private final GraveModel model = new GraveModel();
@@ -31,6 +38,19 @@ public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
         matrixStackIn.rotate(Vector3f.YP.rotationDegrees(-entityYaw+180));
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
         this.model.render(matrixStackIn, bufferIn.getBuffer(this.getRenderType(entityIn)), packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+
+        /*
+        FontRenderer font = this.getFontRendererFromRenderManager();
+        String name = entityIn.getOwnerName();
+        float scale = Math.min(0.014f, 0.014f / (font.getStringWidth(name) / 55f));
+        matrixStackIn.translate(0, 3/16f, 4.99/16f);
+        matrixStackIn.scale(-scale, -scale, scale);
+        float nameWidth = font.getStringWidth(name);
+        float nameHeight = font.FONT_HEIGHT;
+        font.drawString(matrixStackIn, name, -nameWidth / 2, -nameHeight / 2, 0xffffff);
+
+         */
+
         matrixStackIn.pop();
     }
 

@@ -40,6 +40,7 @@ import java.util.UUID;
 public class GraveEntity extends Entity {
 
     private static final DataParameter<Optional<UUID>> OWNER = EntityDataManager.createKey(GraveEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
+    private static final DataParameter<String> OWNER_NAME = EntityDataManager.createKey(GraveEntity.class, DataSerializers.STRING);
 
     private List<IGraveData> contents = new ArrayList<>();
 
@@ -65,7 +66,7 @@ public class GraveEntity extends Entity {
 
     public GraveEntity(PlayerEntity player) {
         this(Registry.GRAVE_ENTITY_TYPE.get(), player.world);
-        this.setOwner(player.getUniqueID());
+        this.setOwner(player);
     }
 
     @Override
@@ -113,6 +114,7 @@ public class GraveEntity extends Entity {
     @Override
     protected void registerData() {
         this.dataManager.register(OWNER, Optional.empty());
+        this.dataManager.register(OWNER_NAME, "");
     }
 
     @Override
@@ -176,6 +178,9 @@ public class GraveEntity extends Entity {
         if (this.getOwnerUUID() != null) {
             graveNBT.putUniqueId("Owner", this.getOwnerUUID());
         }
+        if (!this.getOwnerName().isEmpty()) {
+            graveNBT.putString("OwnerName", this.getOwnerName());
+        }
         compound.put("Grave", graveNBT);
     }
 
@@ -195,20 +200,29 @@ public class GraveEntity extends Entity {
         if (graveNBT.contains("Owner")) {
             this.dataManager.set(OWNER, Optional.of(graveNBT.getUniqueId("Owner")));
         }
+        if (graveNBT.contains("OwnerName")) {
+            this.dataManager.set(OWNER_NAME, graveNBT.getString("OwnerName"));
+        }
     }
 
     public void setContents(List<IGraveData> contents) {
         this.contents = contents;
     }
 
-    public void setOwner(UUID ownerUUID) {
-        this.dataManager.set(OWNER, Optional.of(ownerUUID));
+    public void setOwner(PlayerEntity owner) {
+        this.dataManager.set(OWNER, Optional.of(owner.getUniqueID()));
+        this.dataManager.set(OWNER_NAME, owner.getName().getString());
+    }
+
+    public String getOwnerName() {
+        return this.dataManager.get(OWNER_NAME);
     }
 
     @Nullable
     public PlayerEntity getOwner() {
         return this.dataManager.get(OWNER).map(this.world::getPlayerByUuid).orElse(null);
     }
+
 
     @Nullable
     public UUID getOwnerUUID() {
