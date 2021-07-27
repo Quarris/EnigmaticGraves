@@ -138,10 +138,14 @@ public class GraveManager {
     }
 
     public static void setGraveRestored(UUID player, GraveEntity grave) {
-        getWorldGraveData(grave.world).getGraveEntriesForPlayer(player).stream()
+        LinkedList<PlayerGraveEntry> entries = getWorldGraveData(grave.world).getGraveEntriesForPlayer(player);
+        // The entry may not be present after death if the clear command is used before the retrieval of the grave.
+        if (entries != null) {
+            entries.stream()
                 .filter(entry -> entry.graveUUID.equals(grave.getUniqueID()))
                 .findFirst()
                 .ifPresent(PlayerGraveEntry::setRestored);
+        }
     }
 
     /**
