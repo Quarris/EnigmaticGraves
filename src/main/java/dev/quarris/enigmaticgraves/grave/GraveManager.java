@@ -20,6 +20,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorld;
@@ -157,7 +158,7 @@ public class GraveManager {
         GraveConfigs.Common configs = GraveConfigs.COMMON;
         // First, try to find the first non-air block below the death point
         // and return the air block above that.
-        for (BlockPos.Mutable pos = new BlockPos(deathPos).toMutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
+        for (BlockPos.Mutable pos = new BlockPos(deathPos.x, Math.round(deathPos.y), deathPos.z).toMutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
             BlockPos belowPos = new BlockPos(pos).down();
             BlockState belowState = world.getBlockState(belowPos);
             if (blocksMovement(belowState)) {

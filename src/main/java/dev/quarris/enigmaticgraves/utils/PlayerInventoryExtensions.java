@@ -23,6 +23,9 @@ public class PlayerInventoryExtensions {
         if (stack.isEmpty())
             return false;
 
+        if (slot == -1) {
+            slot = inventory.getFirstEmptyStack();
+        }
         int leftOver = addResource(inventory, slot, stack);
         stack.setCount(leftOver);
 

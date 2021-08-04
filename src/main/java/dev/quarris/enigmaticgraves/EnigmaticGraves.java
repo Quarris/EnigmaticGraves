@@ -1,6 +1,5 @@
 package dev.quarris.enigmaticgraves;
 
-import com.mojang.brigadier.arguments.ArgumentType;
 import dev.quarris.enigmaticgraves.command.GraveEntryType;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;

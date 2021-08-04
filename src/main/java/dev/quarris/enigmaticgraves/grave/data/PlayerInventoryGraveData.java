@@ -2,10 +2,11 @@ package dev.quarris.enigmaticgraves.grave.data;
 
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
-import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -13,14 +14,16 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public class PlayerInventoryGraveData implements IGraveData {
 
     public static final ResourceLocation NAME = ModRef.res("player_inventory");
     private ListNBT data;
-    private NonNullList<ItemStack> remainingItems;
+    private List<ItemStack> remainingItems = new ArrayList<>();
 
     public PlayerInventoryGraveData(PlayerInventory inventory, Collection<ItemStack> drops) {
         PlayerInventory graveInv = new PlayerInventory(inventory.player);
@@ -44,6 +47,16 @@ public class PlayerInventoryGraveData implements IGraveData {
             graveInv.removeStackFromSlot(slot);
         }
 
+        for (int slot = 0; slot < graveInv.armorInventory.size(); slot++) {
+            ItemStack stack = graveInv.armorItemInSlot(slot);
+            if (EnchantmentHelper.hasBindingCurse(stack)) {
+                if (!PlayerInventoryExtensions.addItemToPlayerInventory(graveInv, -1, stack)) {
+                    this.remainingItems.add(stack);
+                }
+                graveInv.armorInventory.set(slot, ItemStack.EMPTY);
+            }
+        }
+
         this.data = graveInv.write(new ListNBT());
     }
 
@@ -52,7 +65,7 @@ public class PlayerInventoryGraveData implements IGraveData {
     }
 
     public void addRemaining(Collection<ItemStack> remaining) {
-        this.remainingItems = NonNullList.from(ItemStack.EMPTY, remaining.toArray(new ItemStack[0]));
+        this.remainingItems.addAll(remaining);
     }
 
     @Override
@@ -73,11 +86,9 @@ public class PlayerInventoryGraveData implements IGraveData {
             PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, item);
         }
 
-        if (this.remainingItems != null) {
-            for (ItemStack remainingStack : this.remainingItems) {
-                if (!player.inventory.addItemStackToInventory(remainingStack)) {
-                    player.entityDropItem(remainingStack);
-                }
+        for (ItemStack remainingStack : this.remainingItems) {
+            if (!player.inventory.addItemStackToInventory(remainingStack)) {
+                player.entityDropItem(remainingStack);
             }
         }
     }
@@ -87,7 +98,8 @@ public class PlayerInventoryGraveData implements IGraveData {
         nbt.put("Data", this.data);
         if (this.remainingItems != null) {
             nbt.putInt("RemainingSize", this.remainingItems.size());
-            nbt.put("Remaining", ItemStackHelper.saveAllItems(new CompoundNBT(), this.remainingItems));
+            NonNullList<ItemStack> items = NonNullList.from(ItemStack.EMPTY, this.remainingItems.toArray(new ItemStack[this.remainingItems.size()]));
+            nbt.put("Remaining", ItemStackHelper.saveAllItems(new CompoundNBT(), items));
         }
         return nbt;
     }
@@ -97,8 +109,9 @@ public class PlayerInventoryGraveData implements IGraveData {
         this.data = nbt.getList("Data", Constants.NBT.TAG_COMPOUND);
         if (nbt.contains("Remaining")) {
             int size = nbt.getInt("RemainingSize");
-            this.remainingItems = NonNullList.withSize(size, ItemStack.EMPTY);
-            ItemStackHelper.loadAllItems(nbt.getCompound("Remaining"), this.remainingItems);
+            NonNullList<ItemStack> items = NonNullList.withSize(size, ItemStack.EMPTY);
+            ItemStackHelper.loadAllItems(nbt.getCompound("Remaining"), items);
+            this.remainingItems.addAll(items);
         }
     }
 

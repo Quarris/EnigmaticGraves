@@ -25,6 +25,7 @@ public class Setup {
 
     @SubscribeEvent
     public static void commonSetup(FMLCommonSetupEvent event) {
+
     }
 
     @SubscribeEvent
