@@ -133,6 +133,15 @@ public class GraveEntity extends Entity {
             return ActionResultType.func_233537_a_(this.world.isRemote);
         }
 
+
+        if (player.isCreative()) {
+            ItemStack heldItem = player.getHeldItem(hand);
+            if (heldItem.getItem() == Registry.GRAVE_FINDER_ITEM.get() && !heldItem.hasTag()) {
+                this.remove();
+                return ActionResultType.func_233537_a_(this.world.isRemote);
+            }
+        }
+
         return ActionResultType.PASS;
     }
 

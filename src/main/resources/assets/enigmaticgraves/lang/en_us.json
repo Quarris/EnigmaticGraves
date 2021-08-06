@@ -1,3 +1,6 @@
 {
-    "entity.enigmaticgraves.grave": "Grave"
+    "entity.enigmaticgraves.grave": "Grave",
+    "item.enigmaticgraves.grave_finder": "Grave Finder",
+    "info.grave.remove_grave": "No Grave Location. Right click me (in creative) on a grave to remove it!",
+    "info.grave.not_found": "Grave position not found!"
 }
