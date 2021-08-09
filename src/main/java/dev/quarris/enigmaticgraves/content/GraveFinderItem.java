@@ -23,6 +23,9 @@ public class GraveFinderItem extends Item {
 
     @Override
     public void addInformation(ItemStack stack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flagIn) {
+        if (worldIn == null)
+            return;
+
         CompoundNBT nbt = stack.getTag();
         if (nbt == null) {
             tooltip.add(new TranslationTextComponent("info.grave.remove_grave"));
