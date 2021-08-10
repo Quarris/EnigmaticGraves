@@ -48,7 +48,7 @@ public class PlayerInventoryGraveData implements IGraveData {
         }
 
         for (int slot = 0; slot < graveInv.armorInventory.size(); slot++) {
-            ItemStack stack = graveInv.armorItemInSlot(slot);
+            ItemStack stack = graveInv.armorInventory.get(slot);
             if (EnchantmentHelper.hasBindingCurse(stack)) {
                 if (!PlayerInventoryExtensions.addItemToPlayerInventory(graveInv, -1, stack)) {
                     this.remainingItems.add(stack);
