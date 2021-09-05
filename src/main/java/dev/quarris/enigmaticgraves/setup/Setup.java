@@ -47,6 +47,8 @@ public class Setup {
                 protected void addTranslations() {
                     this.addItem(Registry.GRAVE_FINDER_ITEM, "Grave Finder");
                     this.add("enigmaticgraves.grave.not_found", "No bound grave");
+                    this.addEntityType(Registry.GRAVE_ENTITY_TYPE, "Grave");
+                    this.add("info.grave.remove_grave", "No Grave Location. Right click me (in creative) on a grave to remove it!");
                 }
             });
         }
