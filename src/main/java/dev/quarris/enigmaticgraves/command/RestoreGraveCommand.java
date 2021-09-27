@@ -94,10 +94,11 @@ public class RestoreGraveCommand {
                         }))));
 
 
-        dispatcher.register(Commands.literal("graves").executes(ctx -> {
-            ctx.getSource().sendFeedback(HELP, false);
-            return 0;
-        }).redirect(cmd));
+        dispatcher.register(Commands.literal("graves").requires(source -> source.hasPermissionLevel(2))
+            .executes(ctx -> {
+                ctx.getSource().sendFeedback(HELP, false);
+                return 0;
+            }).redirect(cmd));
     }
 
     private static int restoreGrave(CommandContext<CommandSource> ctx, boolean useArg, boolean forced) throws CommandSyntaxException {
