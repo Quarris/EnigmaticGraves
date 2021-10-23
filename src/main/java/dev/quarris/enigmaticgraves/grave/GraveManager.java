@@ -2,6 +2,7 @@ package dev.quarris.enigmaticgraves.grave;
 
 import dev.quarris.enigmaticgraves.compat.CompatManager;
 import dev.quarris.enigmaticgraves.compat.CurioCompat;
+import dev.quarris.enigmaticgraves.compat.CosmeticArmorReworkedCompat;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.config.GraveConfigs.Common.ExperienceHandling;
 import dev.quarris.enigmaticgraves.content.GraveEntity;
@@ -9,6 +10,7 @@ import dev.quarris.enigmaticgraves.grave.data.CurioGraveData;
 import dev.quarris.enigmaticgraves.grave.data.ExperienceGraveData;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import dev.quarris.enigmaticgraves.grave.data.PlayerInventoryGraveData;
+import dev.quarris.enigmaticgraves.grave.data.CosmeticArmorReworkedGraveData;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.pattern.BlockPattern;
@@ -43,6 +45,9 @@ public class GraveManager {
         GRAVE_DATA_SUPPLIERS.put(ExperienceGraveData.NAME, ExperienceGraveData::new);
         if (CompatManager.isCuriosLoaded()) {
             GRAVE_DATA_SUPPLIERS.put(CurioGraveData.NAME, CurioGraveData::new);
+        }
+        if (CompatManager.isCosmeticArmorReworkedLoaded()) {
+            GRAVE_DATA_SUPPLIERS.put(CosmeticArmorReworkedGraveData.NAME, CosmeticArmorReworkedGraveData::new);
         }
     }
 
@@ -131,6 +136,13 @@ public class GraveManager {
             IGraveData curiosData = CurioCompat.generateCurioGraveData(player, drops);
             if (curiosData != null) {
                 dataList.add(curiosData);
+            }
+        }
+
+        if (CompatManager.isCosmeticArmorReworkedLoaded()) {
+            IGraveData cosmeticArmorReworkedsData = CosmeticArmorReworkedCompat.generateCosmeticArmorReworkedGraveData(player, drops);
+            if (cosmeticArmorReworkedsData != null) {
+                dataList.add(cosmeticArmorReworkedsData);
             }
         }
 
