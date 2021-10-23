@@ -22,7 +22,7 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.6.3'
+version = '1.6.4'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -112,7 +112,7 @@ dependencies {
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1:api")
     compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
     compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
-    //compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
+    compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
 
     // Testing Dependencies
     runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')
