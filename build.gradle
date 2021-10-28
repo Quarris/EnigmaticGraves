@@ -113,6 +113,7 @@ dependencies {
     compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
     compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
     compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
+    compileOnly 'curse.maven:journeymap-32274:3397059'
 
     // Testing Dependencies
     runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')

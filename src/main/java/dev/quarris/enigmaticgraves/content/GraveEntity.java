@@ -1,5 +1,7 @@
 package dev.quarris.enigmaticgraves.content;
 
+import dev.quarris.enigmaticgraves.compat.CompatManager;
+import dev.quarris.enigmaticgraves.compat.JourneymapCompat;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
@@ -145,8 +147,14 @@ public class GraveEntity extends Entity {
         for (IGraveData data : this.contents) {
             data.restore(player);
         }
+
         GraveManager.setGraveRestored(this.getOwnerUUID(), this);
         this.restored = true;
+
+        if (CompatManager.isJourneymapLoaded()) {
+            JourneymapCompat.restored(this);
+        }
+
         this.remove();
     }
 

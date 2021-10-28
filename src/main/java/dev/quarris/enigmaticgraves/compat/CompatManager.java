@@ -11,6 +11,7 @@ public class CompatManager {
     public static final String TOP_ID = "theoneprobe";
     public static final String WAILA_ID = "waila";
     public static final String COSMETICARMORREWORKED_ID = "cosmeticarmorreworked";
+    public static final String JOURNEYMAP_ID = "journeymap";
 
     public static boolean isModLoaded(String mod) {
         return ModList.get().isLoaded(mod);
@@ -32,6 +33,9 @@ public class CompatManager {
         return isModLoaded(COSMETICARMORREWORKED_ID);
     }
 
+    public static boolean isJourneymapLoaded() {
+        return isModLoaded(JOURNEYMAP_ID);
+    }
 
     public static void cacheModdedHandlers(PlayerEntity player) {
         ModRef.LOGGER.debug("Caching modded handlers for " + player.getName().getString());
