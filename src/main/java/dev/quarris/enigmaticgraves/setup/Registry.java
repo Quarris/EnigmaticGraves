@@ -3,7 +3,6 @@ package dev.quarris.enigmaticgraves.setup;
 import dev.quarris.enigmaticgraves.content.GraveFinderItem;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import dev.quarris.enigmaticgraves.content.GraveEntity;
-import net.minecraft.block.Block;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
@@ -21,7 +20,13 @@ public class Registry {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, ModRef.ID);
 
     public static final RegistryObject<Item> GRAVE_FINDER_ITEM = ITEMS.register("grave_finder", GraveFinderItem::new);
-    public static final RegistryObject<EntityType<GraveEntity>> GRAVE_ENTITY_TYPE = ENTITIES.register("grave", () -> EntityType.Builder.<GraveEntity>of(GraveEntity::new, EntityClassification.MISC).sized(14/16f, 14/16f).fireImmune().canSpawnFarFromPlayer().build("grave"));
+    public static final RegistryObject<EntityType<GraveEntity>> GRAVE_ENTITY_TYPE = ENTITIES
+        .register("grave", () ->
+            EntityType.Builder.<GraveEntity>of(GraveEntity::new, EntityClassification.MISC)
+                .sized(14/16f, 14/16f)
+                .fireImmune()
+                .canSpawnFarFromPlayer()
+                .build("grave"));
 
 
     public static void init() {
