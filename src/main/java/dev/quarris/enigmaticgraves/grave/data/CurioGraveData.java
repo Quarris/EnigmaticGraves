@@ -42,7 +42,7 @@ public class CurioGraveData implements IGraveData {
                         continue;
 
                     ItemStack stack = curioItems.getStacks().getStackInSlot(slot);
-                    if (ItemStack.areItemStacksEqual(stack, drop)) {
+                    if (ItemStack.isSame(stack, drop)) {
                         stackSlotsChecked.add(slot);
                         curioStacksList.set(slot, drop);
                         ite.remove();
@@ -54,7 +54,7 @@ public class CurioGraveData implements IGraveData {
                         continue;
 
                     ItemStack stack = curioItems.getCosmeticStacks().getStackInSlot(slot);
-                    if (ItemStack.areItemStacksEqual(stack, drop)) {
+                    if (ItemStack.isSame(stack, drop)) {
                         cosmeticStacksSlotsChecked.add(slot);
                         curioCosmeticStacksList.set(slot, drop);
                         ite.remove();

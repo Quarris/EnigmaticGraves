@@ -29,12 +29,12 @@ public class WorldGraveData extends WorldSavedData {
 
     public void setGraveRestored(UUID graveUUID) {
         this.restoredGraves.add(graveUUID);
-        this.markDirty();
+        this.setDirty();
     }
 
     public void removeGraveRestored(UUID graveUUID) {
         this.restoredGraves.remove(graveUUID);
-        this.markDirty();
+        this.setDirty();
     }
 
     public boolean isGraveRestored(UUID graveUUID) {
@@ -42,27 +42,27 @@ public class WorldGraveData extends WorldSavedData {
     }
 
     public void addGraveEntry(PlayerEntity player, PlayerGraveEntry entry) {
-        LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(player.getUniqueID(), k -> new LinkedList<>());
+        LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(player.getUUID(), k -> new LinkedList<>());
         if (entries.size() >= GraveConfigs.COMMON.graveEntryCount.get()) {
             ModRef.LOGGER.debug("Entries reached max values for " + player.getName());
             ModRef.LOGGER.debug("Removing oldest entry");
             entries.removeLast();
         }
         entries.addFirst(entry);
-        this.markDirty();
+        this.setDirty();
     }
 
     public void clearGraveEntries(PlayerEntity player) {
-        this.playerGraveEntries.remove(player.getUniqueID());
-        this.markDirty();
+        this.playerGraveEntries.remove(player.getUUID());
+        this.setDirty();
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT compound) {
+    public CompoundNBT save(CompoundNBT compound) {
         ListNBT playerGraveEntriesNBT = new ListNBT();
         for (UUID uuid : this.playerGraveEntries.keySet()) {
             CompoundNBT playerGravesNBT = new CompoundNBT();
-            playerGravesNBT.putUniqueId("UUID", uuid);
+            playerGravesNBT.putUUID("UUID", uuid);
             List<PlayerGraveEntry> entries = this.playerGraveEntries.get(uuid);
             ListNBT entriesNBT = new ListNBT();
             for (PlayerGraveEntry entry : entries) {
@@ -75,20 +75,20 @@ public class WorldGraveData extends WorldSavedData {
 
         ListNBT restoredGravesNBT = new ListNBT();
         for (UUID restoredGraveUUID : this.restoredGraves) {
-            restoredGravesNBT.add(NBTUtil.func_240626_a_(restoredGraveUUID));
+            restoredGravesNBT.add(NBTUtil.createUUID(restoredGraveUUID));
         }
         compound.put("RestoredGraves", restoredGravesNBT);
         return compound;
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
+    public void load(CompoundNBT nbt) {
         this.playerGraveEntries.clear();
         this.restoredGraves.clear();
         ListNBT playerGraveEntriesNBT = nbt.getList("PlayerGraveEntries", Constants.NBT.TAG_COMPOUND);
         for (INBT inbt : playerGraveEntriesNBT) {
             CompoundNBT playerGravesNBT = (CompoundNBT) inbt;
-            UUID uuid = playerGravesNBT.getUniqueId("UUID");
+            UUID uuid = playerGravesNBT.getUUID("UUID");
             ListNBT entriesNBT = playerGravesNBT.getList("Entries", Constants.NBT.TAG_COMPOUND);
             LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(uuid, k -> new LinkedList<>());
             for (int i = 0; i < entriesNBT.size(); i++) {
@@ -99,7 +99,7 @@ public class WorldGraveData extends WorldSavedData {
         }
         ListNBT restoredGravesNBT = nbt.getList("RestoredGraves", Constants.NBT.TAG_COMPOUND);
         for (INBT uuidNBT : restoredGravesNBT) {
-            UUID restoredGraveUUID = NBTUtil.readUniqueId(uuidNBT);
+            UUID restoredGraveUUID = NBTUtil.loadUUID(uuidNBT);
             this.restoredGraves.add(restoredGraveUUID);
         }
     }

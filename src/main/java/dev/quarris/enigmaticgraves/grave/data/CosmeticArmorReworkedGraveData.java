@@ -24,7 +24,7 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
 
             for (int slot = 0; slot < 4; slot++){
                 ItemStack stack = caStacksBase.getStackInSlot(slot);
-                if (ItemStack.areItemStacksEqual(stack, drop)) {
+                if (ItemStack.isSame(stack, drop)) {
                     ite.remove();
                 }
             }
@@ -37,23 +37,23 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
 
     @Override
     public void restore(PlayerEntity player) {
-        CAStacksBase caStacksBase = CosArmorAPI.getCAStacks(player.getUniqueID());
+        CAStacksBase lowPrio = CosArmorAPI.getCAStacks(player.getUUID());
 
         for (int slot = 0; slot < 4; slot++){
-            ItemStack wearing = caStacksBase.getStackInSlot(slot);
-            ItemStack looting = this.caStacksBase.getStackInSlot(slot);
-            if(!wearing.isEmpty() && !looting.isEmpty()){
+            ItemStack lowPrioItem = lowPrio.getStackInSlot(slot);
+            ItemStack highPrioItem = this.caStacksBase.getStackInSlot(slot);
+            if(!lowPrioItem.isEmpty() && !highPrioItem.isEmpty()){
                 // the player equipped cosmetic armor before claiming the grave,
                 // here we de-equip any worn item in favor of what is inside the grave.
-                PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, wearing);
-            }else if(!wearing.isEmpty()){
+                PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, lowPrioItem);
+            }else if(!lowPrioItem.isEmpty()){
                 // if the player is wearing something in a cosmetic armor slot that is not in the grave,
                 // then it gets put in the serializer so the final line of this function doesn't delete it.
-                this.caStacksBase.setStackInSlot(slot, wearing);
+                this.caStacksBase.setStackInSlot(slot, lowPrioItem);
             }
         }
 
-        caStacksBase.deserializeNBT(this.caStacksBase.serializeNBT());
+        lowPrio.deserializeNBT(this.caStacksBase.serializeNBT());
     }
 
     @Override

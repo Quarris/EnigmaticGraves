@@ -27,37 +27,37 @@ public class PlayerInventoryGraveData implements IGraveData {
 
     public PlayerInventoryGraveData(PlayerInventory inventory, Collection<ItemStack> drops) {
         PlayerInventory graveInv = new PlayerInventory(inventory.player);
-        graveInv.copyInventory(inventory);
+        graveInv.replaceWith(inventory);
 
         // Compare the inventory with the player drops
         // If an item from the inventory is not in drops,
         // that means that the item should not be put in the grave
         loop:
-        for (int slot = 0; slot < graveInv.getSizeInventory(); slot++) {
-            ItemStack stack = graveInv.getStackInSlot(slot);
+        for (int slot = 0; slot < graveInv.getContainerSize(); slot++) {
+            ItemStack stack = graveInv.getItem(slot);
 
             Iterator<ItemStack> ite = drops.iterator();
             while (ite.hasNext()) {
                 ItemStack drop = ite.next();
-                if (ItemStack.areItemStacksEqual(stack, drop)) {
+                if (ItemStack.isSame(stack, drop)) {
                     ite.remove();
                     continue loop;
                 }
             }
-            graveInv.removeStackFromSlot(slot);
+            graveInv.removeItemNoUpdate(slot);
         }
 
-        for (int slot = 0; slot < graveInv.armorInventory.size(); slot++) {
-            ItemStack stack = graveInv.armorInventory.get(slot);
+        for (int slot = 0; slot < graveInv.armor.size(); slot++) {
+            ItemStack stack = graveInv.armor.get(slot);
             if (EnchantmentHelper.hasBindingCurse(stack)) {
                 if (!PlayerInventoryExtensions.addItemToPlayerInventory(graveInv, -1, stack)) {
                     this.remainingItems.add(stack);
                 }
-                graveInv.armorInventory.set(slot, ItemStack.EMPTY);
+                graveInv.armor.set(slot, ItemStack.EMPTY);
             }
         }
 
-        this.data = graveInv.write(new ListNBT());
+        this.data = graveInv.save(new ListNBT());
     }
 
     public PlayerInventoryGraveData(CompoundNBT nbt) {
@@ -71,15 +71,15 @@ public class PlayerInventoryGraveData implements IGraveData {
     @Override
     public void restore(PlayerEntity player) {
         PlayerInventory highPriority = new PlayerInventory(player);
-        highPriority.read(this.data);
+        highPriority.load(this.data);
 
         PlayerInventory lowPriority = new PlayerInventory(player);
-        lowPriority.copyInventory(player.inventory);
+        lowPriority.replaceWith(player.inventory);
 
-        player.inventory.copyInventory(highPriority);
+        player.inventory.replaceWith(highPriority);
 
-        for (int slot = 0; slot < lowPriority.getSizeInventory(); slot++) {
-            ItemStack item = lowPriority.getStackInSlot(slot);
+        for (int slot = 0; slot < lowPriority.getContainerSize(); slot++) {
+            ItemStack item = lowPriority.getItem(slot);
             if (item.isEmpty())
                 continue;
 
@@ -87,8 +87,8 @@ public class PlayerInventoryGraveData implements IGraveData {
         }
 
         for (ItemStack remainingStack : this.remainingItems) {
-            if (!player.inventory.addItemStackToInventory(remainingStack)) {
-                player.entityDropItem(remainingStack);
+            if (!player.inventory.add(remainingStack)) {
+                player.spawnAtLocation(remainingStack);
             }
         }
     }
@@ -98,7 +98,7 @@ public class PlayerInventoryGraveData implements IGraveData {
         nbt.put("Data", this.data);
         if (this.remainingItems != null) {
             nbt.putInt("RemainingSize", this.remainingItems.size());
-            NonNullList<ItemStack> items = NonNullList.from(ItemStack.EMPTY, this.remainingItems.toArray(new ItemStack[this.remainingItems.size()]));
+            NonNullList<ItemStack> items = NonNullList.of(ItemStack.EMPTY, this.remainingItems.toArray(new ItemStack[this.remainingItems.size()]));
             nbt.put("Remaining", ItemStackHelper.saveAllItems(new CompoundNBT(), items));
         }
         return nbt;

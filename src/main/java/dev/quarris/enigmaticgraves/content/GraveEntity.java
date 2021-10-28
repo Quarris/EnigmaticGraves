@@ -7,13 +7,11 @@ import dev.quarris.enigmaticgraves.setup.Registry;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.material.PushReaction;
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -39,23 +37,24 @@ import java.util.UUID;
 
 public class GraveEntity extends Entity {
 
-    private static final DataParameter<Optional<UUID>> OWNER = EntityDataManager.createKey(GraveEntity.class, DataSerializers.OPTIONAL_UNIQUE_ID);
-    private static final DataParameter<String> OWNER_NAME = EntityDataManager.createKey(GraveEntity.class, DataSerializers.STRING);
+    private static final DataParameter<Optional<UUID>> OWNER = EntityDataManager.defineId(GraveEntity.class, DataSerializers.OPTIONAL_UUID);
+    private static final DataParameter<String> OWNER_NAME = EntityDataManager.defineId(GraveEntity.class, DataSerializers.STRING);
 
     private List<IGraveData> contents = new ArrayList<>();
+    private boolean restored;
 
     public static GraveEntity createGrave(PlayerEntity player, List<IGraveData> graveData) {
         GraveEntity grave = new GraveEntity(player);
         BlockPos.Mutable spawnPos = new BlockPos.Mutable();
-        boolean spawnBlockBelow = GraveManager.getSpawnPosition(player.world, player.getPositionVec(), spawnPos);
+        boolean spawnBlockBelow = GraveManager.getSpawnPosition(player.level, player.position(), spawnPos);
         if (spawnBlockBelow) {
             ResourceLocation blockName = new ResourceLocation(GraveConfigs.COMMON.graveFloorBlock.get());
-            BlockState state = ForgeRegistries.BLOCKS.getValue(blockName).getDefaultState();
-            player.world.setBlockState(spawnPos.down(), state, 3);
-            player.world.playEvent(2001, spawnPos, Block.getStateId(state));
+            BlockState state = ForgeRegistries.BLOCKS.getValue(blockName).defaultBlockState();
+            player.level.setBlock(spawnPos.below(), state, 3);
+            player.level.levelEvent(2001, spawnPos, Block.getId(state));
         }
-        grave.setRotation(player.rotationYaw, 0);
-        grave.setPositionAndUpdate(spawnPos.getX() + player.getWidth() / 2, spawnPos.getY(), spawnPos.getZ() + player.getWidth() / 2);
+        grave.setRot(player.xRot, 0);
+        grave.setPos(spawnPos.getX() + player.getBbWidth() / 2, spawnPos.getY(), spawnPos.getZ() + player.getBbWidth() / 2);
         grave.setContents(graveData);
         return grave;
     }
@@ -65,16 +64,16 @@ public class GraveEntity extends Entity {
     }
 
     public GraveEntity(PlayerEntity player) {
-        this(Registry.GRAVE_ENTITY_TYPE.get(), player.world);
+        this(Registry.GRAVE_ENTITY_TYPE.get(), player.level);
         this.setOwner(player);
     }
 
     @Override
     public void tick() {
-        if (!this.world.isRemote) {
-            if (GraveManager.getWorldGraveData(this.world).isGraveRestored(this.getUniqueID())) {
+        if (!this.level.isClientSide()) {
+            if (GraveManager.getWorldGraveData(this.level).isGraveRestored(this.getUUID())) {
                 this.remove();
-                GraveManager.getWorldGraveData(this.world).removeGraveRestored(this.getUniqueID());
+                GraveManager.getWorldGraveData(this.level).removeGraveRestored(this.getUUID());
             }
         }
         super.tick();
@@ -82,44 +81,47 @@ public class GraveEntity extends Entity {
 
     @Override
     public boolean isGlowing() {
-        if (this.world.isRemote && this.getOwner() != null && this.getOwnerUUID().equals(Minecraft.getInstance().player.getUniqueID())) {
-            PlayerEntity player = this.getOwner();
+        if (this.level.isClientSide) {
+            PlayerEntity player = Minecraft.getInstance().player;
+
             // Try to find the grave item in one of the hands, prioritising the main hand
             ItemStack stack = null;
-            if (player.getHeldItemMainhand().getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
-                stack = player.getHeldItemMainhand();
+            if (player.getMainHandItem().getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
+                stack = player.getMainHandItem();
             }
-            if (stack == null && player.getHeldItemOffhand().getItem() != Registry.GRAVE_FINDER_ITEM.get()) {
-                stack = player.getHeldItemOffhand();
+            if (stack == null && player.getOffhandItem().getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
+                stack = player.getOffhandItem();
             }
 
+            // If we don't have a grave finder is any hand, we do not glow the grave
             if (stack == null)
                 return false;
 
-            if (!stack.hasTag() || !stack.getTag().contains("GraveUUID"))
-                return false;
+            boolean hasTag = stack.hasTag() && stack.getTag().contains("GraveUUID");
+            UUID graveUUID = hasTag ? stack.getTag().getUUID("GraveUUID") : null;
 
-            UUID graveUUID = stack.getTag().getUniqueId("GraveUUID");
-            if (this.getUniqueID().equals(graveUUID))
-                return true;
+            // Can glow if:
+            // In Creative or Spectator,
+            // Or we are the Owner, and the grave finder points to this grave
+            return player.isCreative() || player.isSpectator() || (player.getUUID().equals(this.getOwnerUUID()) && this.getUUID().equals(graveUUID));
         }
         return super.isGlowing();
     }
 
     @Override
-    public PushReaction getPushReaction() {
+    public PushReaction getPistonPushReaction() {
         return PushReaction.IGNORE;
     }
 
     @Override
-    protected void registerData() {
-        this.dataManager.register(OWNER, Optional.empty());
-        this.dataManager.register(OWNER_NAME, "");
+    protected void defineSynchedData() {
+        this.entityData.define(OWNER, Optional.empty());
+        this.entityData.define(OWNER_NAME, "");
     }
 
     @Override
-    public void onCollideWithPlayer(PlayerEntity player) {
-        if (player.isSneaking()) {
+    public void playerTouch(PlayerEntity player) {
+        if (player.isShiftKeyDown()) {
             if (this.belongsTo(player)) {
                 this.restoreGrave(player);
             }
@@ -127,18 +129,17 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    public ActionResultType processInitialInteract(PlayerEntity player, Hand hand) {
+    public ActionResultType interact(PlayerEntity player, Hand hand) {
         if (this.belongsTo(player)) {
             this.restoreGrave(player);
-            return ActionResultType.func_233537_a_(this.world.isRemote);
+            return ActionResultType.sidedSuccess(this.level.isClientSide);
         }
 
-
         if (player.isCreative()) {
-            ItemStack heldItem = player.getHeldItem(hand);
+            ItemStack heldItem = player.getItemInHand(hand);
             if (heldItem.getItem() == Registry.GRAVE_FINDER_ITEM.get() && !heldItem.hasTag()) {
                 this.remove();
-                return ActionResultType.func_233537_a_(this.world.isRemote);
+                return ActionResultType.sidedSuccess(this.level.isClientSide);
             }
         }
 
@@ -146,18 +147,18 @@ public class GraveEntity extends Entity {
     }
 
     private void restoreGrave(PlayerEntity player) {
-        if (!this.isAlive() || this.world.isRemote)
+        if (!this.isAlive() || this.level.isClientSide())
             return;
 
         // Remove the corresponding grave finder from the player inventory
-        for (int slot = 0; slot < player.inventory.getSizeInventory(); slot++) {
-            ItemStack stack = player.inventory.getStackInSlot(slot);
+        for (int slot = 0; slot < player.inventory.getContainerSize(); slot++) {
+            ItemStack stack = player.inventory.getItem(slot);
             if (stack.getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
                 if (stack.hasTag()) {
                     CompoundNBT nbt = stack.getTag();
                     if (nbt != null && nbt.contains("GraveUUID")) {
-                        if (nbt.getUniqueId("GraveUUID").equals(this.getUniqueID())) {
-                            player.inventory.setInventorySlotContents(slot, ItemStack.EMPTY);
+                        if (nbt.getUUID("GraveUUID").equals(this.getUUID())) {
+                            player.inventory.setItem(slot, ItemStack.EMPTY);
                             break;
                         }
                     }
@@ -169,15 +170,24 @@ public class GraveEntity extends Entity {
             data.restore(player);
         }
         GraveManager.setGraveRestored(this.getOwnerUUID(), this);
+        this.restored = true;
         this.remove();
     }
 
+    @Override
+    public void remove() {
+        super.remove();
+        if (!this.level.isClientSide && !this.restored) {
+            ModRef.LOGGER.warn("Grave at {} was removed without being restored!", this.blockPosition());
+        }
+    }
+
     private boolean belongsTo(PlayerEntity player) {
-        return player.getUniqueID().equals(this.getOwnerUUID());
+        return player.getUUID().equals(this.getOwnerUUID());
     }
 
     @Override
-    protected void writeAdditional(CompoundNBT compound) {
+    protected void addAdditionalSaveData(CompoundNBT compound) {
         CompoundNBT graveNBT = new CompoundNBT();
         ListNBT contentNBT = new ListNBT();
         for (IGraveData data : this.contents) {
@@ -185,7 +195,7 @@ public class GraveEntity extends Entity {
         }
         graveNBT.put("Content", contentNBT);
         if (this.getOwnerUUID() != null) {
-            graveNBT.putUniqueId("Owner", this.getOwnerUUID());
+            graveNBT.putUUID("Owner", this.getOwnerUUID());
         }
         if (!this.getOwnerName().isEmpty()) {
             graveNBT.putString("OwnerName", this.getOwnerName());
@@ -194,7 +204,7 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    protected void readAdditional(CompoundNBT compound) {
+    protected void readAdditionalSaveData(CompoundNBT compound) {
         CompoundNBT graveNBT = compound.getCompound("Grave");
 
         List<IGraveData> dataList = new ArrayList<>();
@@ -207,10 +217,10 @@ public class GraveEntity extends Entity {
         }
         this.setContents(dataList);
         if (graveNBT.contains("Owner")) {
-            this.dataManager.set(OWNER, Optional.of(graveNBT.getUniqueId("Owner")));
+            this.entityData.set(OWNER, Optional.of(graveNBT.getUUID("Owner")));
         }
         if (graveNBT.contains("OwnerName")) {
-            this.dataManager.set(OWNER_NAME, graveNBT.getString("OwnerName"));
+            this.entityData.set(OWNER_NAME, graveNBT.getString("OwnerName"));
         }
     }
 
@@ -219,32 +229,31 @@ public class GraveEntity extends Entity {
     }
 
     public void setOwner(PlayerEntity owner) {
-        this.dataManager.set(OWNER, Optional.of(owner.getUniqueID()));
-        this.dataManager.set(OWNER_NAME, owner.getName().getString());
+        this.entityData.set(OWNER, Optional.of(owner.getUUID()));
+        this.entityData.set(OWNER_NAME, owner.getName().getString());
     }
 
     public String getOwnerName() {
-        return this.dataManager.get(OWNER_NAME);
+        return this.entityData.get(OWNER_NAME);
     }
 
     @Nullable
     public PlayerEntity getOwner() {
-        return this.dataManager.get(OWNER).map(this.world::getPlayerByUuid).orElse(null);
+        return this.entityData.get(OWNER).map(this.level::getPlayerByUUID).orElse(null);
     }
-
 
     @Nullable
     public UUID getOwnerUUID() {
-        return this.dataManager.get(OWNER).orElse(null);
+        return this.entityData.get(OWNER).orElse(null);
     }
 
     @Override
-    public boolean canBeCollidedWith() {
+    public boolean isPickable() {
         return true;
     }
 
     @Override
-    public IPacket<?> createSpawnPacket() {
+    public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

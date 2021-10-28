@@ -32,7 +32,7 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
 
     public PlayerGraveEntry(PlayerInventory inventory) {
         this.inventory = new PlayerInventory(inventory.player);
-        this.inventory.copyInventory(inventory);
+        this.inventory.replaceWith(inventory);
         this.timestamp = new Date();
     }
 
@@ -48,7 +48,7 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
     @Override
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putUniqueId("Grave", this.graveUUID);
+        nbt.putUUID("Grave", this.graveUUID);
         nbt.put("Pos", NBTUtil.writeBlockPos(this.gravePos));
         nbt.putLong("Timestamp", this.timestamp.getTime());
         ListNBT dataNBT = new ListNBT();
@@ -62,7 +62,7 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundNBT> {
 
     @Override
     public void deserializeNBT(CompoundNBT nbt) {
-        this.graveUUID = nbt.getUniqueId("Grave");
+        this.graveUUID = nbt.getUUID("Grave");
         this.gravePos = NBTUtil.readBlockPos(nbt.getCompound("Pos"));
         this.timestamp = new Date(nbt.getLong("Timestamp"));
         ListNBT dataNBT = nbt.getList("Data", Constants.NBT.TAG_COMPOUND);

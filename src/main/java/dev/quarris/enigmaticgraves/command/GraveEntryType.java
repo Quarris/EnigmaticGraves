@@ -29,7 +29,7 @@ public class GraveEntryType implements ArgumentType<Integer> {
 
     public static PlayerGraveEntry getEntry(UUID playerUUID, CommandContext<CommandSource> context, String name) {
         int deathId = context.getArgument(name, Integer.class);
-        return GraveManager.getWorldGraveData(context.getSource().getWorld())
+        return GraveManager.getWorldGraveData(context.getSource().getLevel())
                 .getGraveEntriesForPlayer(playerUUID)
                 .get(deathId);
     }
@@ -59,8 +59,8 @@ public class GraveEntryType implements ArgumentType<Integer> {
         }
         if (context.getSource() instanceof CommandSource) {
             try {
-                ServerPlayerEntity player = ((CommandSource) context.getSource()).asPlayer();
-                LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.world).getGraveEntriesForPlayer(player.getUniqueID());
+                ServerPlayerEntity player = ((CommandSource) context.getSource()).getPlayerOrException();
+                LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID());
                 if (entries == null) {
                     return Suggestions.empty();
                 }

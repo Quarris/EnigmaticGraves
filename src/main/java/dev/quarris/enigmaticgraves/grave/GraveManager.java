@@ -54,16 +54,15 @@ public class GraveManager {
     public static WorldGraveData getWorldGraveData(IWorld world) {
         if (world instanceof ServerWorld) {
             MinecraftServer server = ((ServerWorld) world).getServer();
-            ServerWorld overworld = server.getWorld(World.OVERWORLD);
-            return overworld.getSavedData().getOrCreate(WorldGraveData::new, WorldGraveData.NAME);
+            ServerWorld overworld = server.getLevel(World.OVERWORLD);
+            return overworld.getDataStorage().computeIfAbsent(WorldGraveData::new, WorldGraveData.NAME);
         }
 
         return null;
     }
 
     public static boolean shouldSpawnGrave(PlayerEntity player) {
-        return !player.world.getGameRules().getBoolean(GameRules.KEEP_INVENTORY) &&
-                !player.isSpectator();
+        return !player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator();
 
     }
 
@@ -75,37 +74,37 @@ public class GraveManager {
 
         ModRef.LOGGER.info("Preparing grave for " + player.getName().getString());
         PlayerGraveEntry entry = new PlayerGraveEntry(player.inventory);
-        LATEST_GRAVE_ENTRY.put(player.getUniqueID(), entry);
+        LATEST_GRAVE_ENTRY.put(player.getUUID(), entry);
     }
 
     public static void populatePlayerGrave(PlayerEntity player, Collection<ItemStack> drops) {
-        if (!LATEST_GRAVE_ENTRY.containsKey(player.getUniqueID()))
+        if (!LATEST_GRAVE_ENTRY.containsKey(player.getUUID()))
             return;
 
         ModRef.LOGGER.debug("Populating grave for " + player.getName().getString());
-        PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUniqueID());
+        PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUUID());
         generateGraveDataList(player, entry, drops);
     }
 
     public static void spawnPlayerGrave(PlayerEntity player) {
-        if (!LATEST_GRAVE_ENTRY.containsKey(player.getUniqueID()))
+        if (!LATEST_GRAVE_ENTRY.containsKey(player.getUUID()))
             return;
 
-        WorldGraveData worldData = getWorldGraveData(player.world);
-        PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUniqueID());
+        WorldGraveData worldData = getWorldGraveData(player.level);
+        PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUUID());
         GraveEntity grave = GraveEntity.createGrave(player, entry.dataList);
-        ModRef.LOGGER.debug("Attempting to spawn grave for " + player.getName().getString() + " at " + grave.getPosition());
-        entry.graveUUID = grave.getUniqueID();
-        entry.gravePos = grave.getPosition();
-        if (!player.world.addEntity(grave)) {
+        ModRef.LOGGER.debug("Attempting to spawn grave for " + player.getName().getString() + " at " + grave.blockPosition());
+        entry.graveUUID = grave.getUUID();
+        entry.gravePos = grave.blockPosition();
+        if (!player.level.addFreshEntity(grave)) {
             ModRef.LOGGER.warn("Could not spawn grave for " + player.getName().getString());
         } else {
-            ModRef.LOGGER.info("Spawned grave for " + player.getName().getString() + " at " + grave.getPosition());
+            ModRef.LOGGER.info("Spawned grave for " + player.getName().getString() + " at " + grave.blockPosition());
         }
         worldData.addGraveEntry(player, entry);
         ModRef.LOGGER.info("Added grave entry to player " + player.getName().getString());
 
-        LATEST_GRAVE_ENTRY.remove(player.getUniqueID());
+        LATEST_GRAVE_ENTRY.remove(player.getUUID());
     }
 
     public static void generateGraveDataList(PlayerEntity player, PlayerGraveEntry entry, Collection<ItemStack> drops) {
@@ -118,13 +117,13 @@ public class GraveManager {
             int xp = 0; // if (xpHandling == ExperienceHandling.REMOVE)
             if (xpHandling == ExperienceHandling.KEEP_VANILLA) {
                 // The 'player' param is not used for PlayerEntity, using ourselves to prevent random NPE crashes from possible mixins
-                xp = player.getExperiencePoints(player);
+                xp = player.getExperienceReward(player);
                 xp = net.minecraftforge.event.ForgeEventFactory.getExperienceDrop(player, player, xp);
             } else if (xpHandling == ExperienceHandling.KEEP_ALL) {
-                xp += player.experience * player.xpBarCap();
+                xp += player.experienceProgress * player.getXpNeededForNextLevel();
                 while (player.experienceLevel > 0) {
                     player.experienceLevel--;
-                    xp += player.xpBarCap();
+                    xp += player.getXpNeededForNextLevel();
                 }
             }
 
@@ -151,11 +150,11 @@ public class GraveManager {
     }
 
     public static void setGraveRestored(UUID player, GraveEntity grave) {
-        LinkedList<PlayerGraveEntry> entries = getWorldGraveData(grave.world).getGraveEntriesForPlayer(player);
+        LinkedList<PlayerGraveEntry> entries = getWorldGraveData(grave.level).getGraveEntriesForPlayer(player);
         // The entry may not be present after death if the clear command is used before the retrieval of the grave.
         if (entries != null) {
             entries.stream()
-                .filter(entry -> entry.graveUUID.equals(grave.getUniqueID()))
+                .filter(entry -> entry.graveUUID.equals(grave.getUUID()))
                 .findFirst()
                 .ifPresent(PlayerGraveEntry::setRestored);
         }
@@ -170,11 +169,11 @@ public class GraveManager {
         GraveConfigs.Common configs = GraveConfigs.COMMON;
         // First, try to find the first non-air block below the death point
         // and return the air block above that.
-        for (BlockPos.Mutable pos = new BlockPos(deathPos.x, Math.round(deathPos.y), deathPos.z).toMutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
-            BlockPos belowPos = new BlockPos(pos).down();
+        for (BlockPos.Mutable pos = new BlockPos(deathPos.x, Math.round(deathPos.y), deathPos.z).mutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
+            BlockPos belowPos = new BlockPos(pos).below();
             BlockState belowState = world.getBlockState(belowPos);
             if (blocksMovement(belowState)) {
-                outPos.setPos(pos);
+                outPos.set(pos);
                 return false;
             }
         }
@@ -184,40 +183,40 @@ public class GraveManager {
         BlockPos pos = new BlockPos(deathPos.x, configs.scanHeight.get(), deathPos.z);
         for (int scan = 0; scan < configs.scanRange.get(); scan++) {
             // First check above the scan
-            BlockPos scanPos = new BlockPos(pos).up(scan);
-            if (!blocksMovement(world.getBlockState(scanPos.up())) &&
+            BlockPos scanPos = new BlockPos(pos).above(scan);
+            if (!blocksMovement(world.getBlockState(scanPos.above())) &&
                 !blocksMovement(world.getBlockState(scanPos)) &&
-                 blocksMovement(world.getBlockState(scanPos.down()))) {
+                 blocksMovement(world.getBlockState(scanPos.below()))) {
 
-                outPos.setPos(scanPos);
+                outPos.set(scanPos);
                 return false;
             }
 
             if (scan > 0) {
                 // Else check below the scan
-                scanPos = new BlockPos(pos).down(scan);
-                if (!blocksMovement(world.getBlockState(scanPos.up())) &&
+                scanPos = new BlockPos(pos).below(scan);
+                if (!blocksMovement(world.getBlockState(scanPos.above())) &&
                     !blocksMovement(world.getBlockState(scanPos)) &&
-                     blocksMovement(world.getBlockState(scanPos.down()))) {
+                     blocksMovement(world.getBlockState(scanPos.below()))) {
 
-                    outPos.setPos(scanPos);
+                    outPos.set(scanPos);
                     return false;
                 }
             }
         }
 
         // The scan is filled with air
-        if (!blocksMovement(world.getBlockState(pos)) && !blocksMovement(world.getBlockState(pos.up()))) {
-            outPos.setPos(pos);
+        if (!blocksMovement(world.getBlockState(pos)) && !blocksMovement(world.getBlockState(pos.above()))) {
+            outPos.set(pos);
             return true;
         }
 
         // If no position was selected, drop the grave at the bottom
-        outPos.setPos(deathPos.x, 1, deathPos.z);
-        return !world.getBlockState(new BlockPos(deathPos.x, 0, deathPos.z)).getMaterial().blocksMovement();
+        outPos.set(deathPos.x, 1, deathPos.z);
+        return !world.getBlockState(new BlockPos(deathPos.x, 0, deathPos.z)).getMaterial().blocksMotion();
     }
 
     private static boolean blocksMovement(BlockState state) {
-        return state.getMaterial().blocksMovement();
+        return state.getMaterial().blocksMotion();
     }
 }

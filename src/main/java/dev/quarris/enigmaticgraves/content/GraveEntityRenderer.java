@@ -34,10 +34,10 @@ public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
 
     @Override
     public void render(GraveEntity entityIn, float entityYaw, float partialTicks, MatrixStack matrixStackIn, IRenderTypeBuffer bufferIn, int packedLightIn) {
-        matrixStackIn.push();
-        matrixStackIn.rotate(Vector3f.YP.rotationDegrees(-entityYaw+180));
+        matrixStackIn.pushPose();
+        matrixStackIn.mulPose(Vector3f.YP.rotationDegrees(-entityYaw+180));
         super.render(entityIn, entityYaw, partialTicks, matrixStackIn, bufferIn, packedLightIn);
-        this.model.render(matrixStackIn, bufferIn.getBuffer(this.getRenderType(entityIn)), packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
+        this.model.renderToBuffer(matrixStackIn, bufferIn.getBuffer(this.getRenderType(entityIn)), packedLightIn, OverlayTexture.NO_OVERLAY, 1, 1, 1, 1);
 
         /*
         FontRenderer font = this.getFontRendererFromRenderManager();
@@ -51,15 +51,15 @@ public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
 
          */
 
-        matrixStackIn.pop();
+        matrixStackIn.popPose();
     }
 
     private RenderType getRenderType(GraveEntity entity) {
-        return this.model.getRenderType(this.getEntityTexture(entity));
+        return this.model.renderType(this.getTextureLocation(entity));
     }
 
     @Override
-    public ResourceLocation getEntityTexture(GraveEntity entity) {
+    public ResourceLocation getTextureLocation(GraveEntity entity) {
         return TEX;
     }
 }

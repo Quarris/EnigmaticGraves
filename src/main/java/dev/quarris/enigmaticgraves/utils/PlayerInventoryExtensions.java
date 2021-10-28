@@ -9,9 +9,9 @@ public class PlayerInventoryExtensions {
 
     public static void tryAddItemToPlayerInvElseDrop(PlayerEntity player, int slot, ItemStack stack) {
         if (!PlayerInventoryExtensions.addItemToPlayerInventory(player.inventory, slot, stack)) {
-            ItemEntity itemEntity = player.entityDropItem(stack);
-            itemEntity.setMotion(0, 0, 0);
-            itemEntity.velocityChanged = true;
+            ItemEntity itemEntity = player.spawnAtLocation(stack);
+            itemEntity.setDeltaMovement(0, 0, 0);
+            itemEntity.hasImpulse = true;
         }
     }
 
@@ -24,7 +24,7 @@ public class PlayerInventoryExtensions {
             return false;
 
         if (slot == -1) {
-            slot = inventory.getFirstEmptyStack();
+            slot = inventory.getFreeSlot();
         }
         int leftOver = addResource(inventory, slot, stack);
         stack.setCount(leftOver);
@@ -33,9 +33,9 @@ public class PlayerInventoryExtensions {
     }
 
     private static int addResource(PlayerInventory inventory, int slot, ItemStack stack) {
-        ItemStack itemstack = inventory.getStackInSlot(slot);
+        ItemStack itemstack = inventory.getItem(slot);
 
-        if (!itemstack.isEmpty() && !(itemstack.isItemEqual(stack) && ItemStack.areItemStackTagsEqual(itemstack, stack))) {
+        if (!itemstack.isEmpty() && !(itemstack.sameItem(stack) && ItemStack.tagMatches(itemstack, stack))) {
             return stack.getCount();
         }
 
@@ -46,7 +46,7 @@ public class PlayerInventoryExtensions {
                 itemstack.setTag(stack.getTag().copy());
             }
 
-            inventory.setInventorySlotContents(slot, itemstack);
+            inventory.setItem(slot, itemstack);
         }
 
         int count = stack.getCount();
@@ -55,14 +55,14 @@ public class PlayerInventoryExtensions {
             amountToInsert = itemstack.getMaxStackSize() - itemstack.getCount();
         }
 
-        if (amountToInsert > inventory.getInventoryStackLimit() - itemstack.getCount()) {
-            amountToInsert = inventory.getInventoryStackLimit() - itemstack.getCount();
+        if (amountToInsert > inventory.getMaxStackSize() - itemstack.getCount()) {
+            amountToInsert = inventory.getMaxStackSize() - itemstack.getCount();
         }
 
         if (amountToInsert != 0) {
             count = count - amountToInsert;
             itemstack.grow(amountToInsert);
-            itemstack.setAnimationsToGo(5);
+            itemstack.setPopTime(5);
         }
         return count;
     }

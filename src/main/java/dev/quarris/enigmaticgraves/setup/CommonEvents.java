@@ -27,7 +27,7 @@ public class CommonEvents {
 
     @SubscribeEvent
     public static void onPlayerDeath(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().world.isRemote)
+        if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().level.isClientSide)
             return;
 
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
@@ -43,7 +43,7 @@ public class CommonEvents {
             return;
 
         ItemStack graveFinder = new ItemStack(Registry.GRAVE_FINDER_ITEM.get());
-        LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(event.getPlayer().world).getGraveEntriesForPlayer(event.getPlayer().getUniqueID());
+        LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(event.getPlayer().level).getGraveEntriesForPlayer(event.getPlayer().getUUID());
 
         if (entries == null || entries.isEmpty())
             return;
@@ -51,8 +51,8 @@ public class CommonEvents {
         PlayerGraveEntry latestEntry = entries.getFirst();
         CompoundNBT nbt = graveFinder.getOrCreateTag();
         nbt.put("Pos", NBTUtil.writeBlockPos(latestEntry.gravePos));
-        nbt.putUniqueId("GraveUUID", latestEntry.graveUUID);
-        event.getPlayer().addItemStackToInventory(graveFinder);
+        nbt.putUUID("GraveUUID", latestEntry.graveUUID);
+        event.getPlayer().addItem(graveFinder);
     }
 
     @SubscribeEvent

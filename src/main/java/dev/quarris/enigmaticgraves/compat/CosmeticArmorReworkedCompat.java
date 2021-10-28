@@ -15,16 +15,16 @@ public class CosmeticArmorReworkedCompat{
     public static void cacheCosmeticArmorReworkeds(PlayerEntity player) {
         try {
             CAStacksBase cached = new CAStacksBase();
-            cached.deserializeNBT(CosArmorAPI.getCAStacks(player.getUniqueID()).serializeNBT());
-            CACHED_COSMETICARMORREWORKEDS.put(player.getUniqueID(), cached);
+            cached.deserializeNBT(CosArmorAPI.getCAStacks(player.getUUID()).serializeNBT());
+            CACHED_COSMETICARMORREWORKEDS.put(player.getUUID(), cached);
         } catch (Exception ignored) {}
     }
 
 
     public static IGraveData generateCosmeticArmorReworkedGraveData(PlayerEntity player, Collection<ItemStack> drops) {
-        if (CACHED_COSMETICARMORREWORKEDS.containsKey(player.getUniqueID())) {
-            IGraveData data = new CosmeticArmorReworkedGraveData(CACHED_COSMETICARMORREWORKEDS.get(player.getUniqueID()), drops);
-            CACHED_COSMETICARMORREWORKEDS.remove(player.getUniqueID());
+        if (CACHED_COSMETICARMORREWORKEDS.containsKey(player.getUUID())) {
+            IGraveData data = new CosmeticArmorReworkedGraveData(CACHED_COSMETICARMORREWORKEDS.get(player.getUUID()), drops);
+            CACHED_COSMETICARMORREWORKEDS.remove(player.getUUID());
             return data;
         }
         return null;

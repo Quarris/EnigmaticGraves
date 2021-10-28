@@ -26,15 +26,15 @@ public class CurioCompat {
             try {
                 ICuriosItemHandler cached = createCurioItemHandler(player);
                 CuriosCapability.INVENTORY.readNBT(cached, null, CuriosCapability.INVENTORY.writeNBT(handler, null));
-                CACHED_CURIOS.put(player.getUniqueID(), cached);
+                CACHED_CURIOS.put(player.getUUID(), cached);
             } catch (Exception ignored) {}
         });
     }
 
     public static IGraveData generateCurioGraveData(PlayerEntity player, Collection<ItemStack> drops) {
-        if (CACHED_CURIOS.containsKey(player.getUniqueID())) {
-            IGraveData data = new CurioGraveData(CACHED_CURIOS.get(player.getUniqueID()), drops);
-            CACHED_CURIOS.remove(player.getUniqueID());
+        if (CACHED_CURIOS.containsKey(player.getUUID())) {
+            IGraveData data = new CurioGraveData(CACHED_CURIOS.get(player.getUUID()), drops);
+            CACHED_CURIOS.remove(player.getUUID());
             return data;
         }
         return null;

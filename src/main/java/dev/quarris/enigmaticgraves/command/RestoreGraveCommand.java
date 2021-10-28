@@ -26,8 +26,8 @@ public class RestoreGraveCommand {
 
     private static final SuggestionProvider<CommandSource> SUGGEST_ENTRIES = (ctx, builder) -> {
         try {
-            ServerPlayerEntity player = ctx.getSource().asPlayer();
-            LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.world).getGraveEntriesForPlayer(player.getUniqueID());
+            ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
+            LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID());
             if (entries == null) {
                 return Suggestions.empty();
             }
@@ -52,17 +52,17 @@ public class RestoreGraveCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         LiteralCommandNode<CommandSource> cmd = dispatcher
             .register(Commands.literal("enigmatic_graves")
-                .requires(source -> source.hasPermissionLevel(2))
+                .requires(source -> source.hasPermission(2))
                 .executes(ctx -> {
-                    ctx.getSource().sendFeedback(HELP, false);
+                    ctx.getSource().sendSuccess(HELP, false);
                     return 0;
                 })
                 .then(Commands.argument("target", EntityArgument.player())
                     .then(Commands.literal("list").executes(ctx -> {
                         ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
-                        List<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(ctx.getSource().getWorld()).getGraveEntriesForPlayer(player.getUniqueID());
+                        List<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(ctx.getSource().getLevel()).getGraveEntriesForPlayer(player.getUUID());
                         if (entries == null) {
-                            ctx.getSource().sendFeedback(new StringTextComponent("The player has no deaths."), false);
+                            ctx.getSource().sendSuccess(new StringTextComponent("The player has no deaths."), false);
                             return 0;
                         }
                         StringBuilder sb = new StringBuilder();
@@ -72,7 +72,7 @@ public class RestoreGraveCommand {
                                 sb.append('\n');
                             }
                         }
-                        ctx.getSource().sendFeedback(new StringTextComponent(sb.toString()), false);
+                        ctx.getSource().sendSuccess(new StringTextComponent(sb.toString()), false);
                         return 0;
                     }))
                     .then(Commands.literal("restore")
@@ -87,16 +87,16 @@ public class RestoreGraveCommand {
                     .then(Commands.literal("clear")
                         .executes(ctx -> {
                             ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
-                            int count = GraveManager.getWorldGraveData(player.world).getGraveEntriesForPlayer(player.getUniqueID()).size();
-                            GraveManager.getWorldGraveData(player.world).clearGraveEntries(player);
-                            ctx.getSource().sendFeedback(new StringTextComponent("Cleared " + count + " entries."), true);
+                            int count = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID()).size();
+                            GraveManager.getWorldGraveData(player.level).clearGraveEntries(player);
+                            ctx.getSource().sendSuccess(new StringTextComponent("Cleared " + count + " entries."), true);
                             return 0;
                         }))));
 
 
-        dispatcher.register(Commands.literal("graves").requires(source -> source.hasPermissionLevel(2))
+        dispatcher.register(Commands.literal("graves").requires(source -> source.hasPermission(2))
             .executes(ctx -> {
-                ctx.getSource().sendFeedback(HELP, false);
+                ctx.getSource().sendSuccess(HELP, false);
                 return 0;
             }).redirect(cmd));
     }
@@ -105,16 +105,16 @@ public class RestoreGraveCommand {
         ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
         PlayerGraveEntry entry;
         if (useArg) {
-            entry = GraveEntryType.getEntry(player.getUniqueID(), ctx, "entry");
+            entry = GraveEntryType.getEntry(player.getUUID(), ctx, "entry");
         } else {
-            entry = GraveManager.getWorldGraveData(ctx.getSource().getWorld())
-                .getGraveEntriesForPlayer(player.getUniqueID()).getFirst();
+            entry = GraveManager.getWorldGraveData(ctx.getSource().getLevel())
+                .getGraveEntriesForPlayer(player.getUUID()).getFirst();
         }
         if (!tryRestoreGrave(entry, player, forced)) {
-            ctx.getSource().sendFeedback(GRAVE_ALREADY_RESTORED, true);
+            ctx.getSource().sendSuccess(GRAVE_ALREADY_RESTORED, true);
             return 1;
         }
-        ctx.getSource().sendFeedback(SUCCESSFULLY_RESTORED, true);
+        ctx.getSource().sendSuccess(SUCCESSFULLY_RESTORED, true);
         return 0;
     }
 
@@ -128,7 +128,7 @@ public class RestoreGraveCommand {
             graveData.restore(player);
         }
         if (!graveEntry.isRestored()) {
-            GraveManager.getWorldGraveData(player.world).setGraveRestored(graveEntry.graveUUID);
+            GraveManager.getWorldGraveData(player.level).setGraveRestored(graveEntry.graveUUID);
         }
         return true;
     }
