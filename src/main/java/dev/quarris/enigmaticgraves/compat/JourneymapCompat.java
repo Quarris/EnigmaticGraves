@@ -21,7 +21,7 @@ public class JourneymapCompat {
         })
         .min(Comparator.comparingDouble(waypoint -> {
             double x = grave.getX() - waypoint.getBlockCenteredX();
-            double y = grave.getX() - waypoint.getBlockCenteredY();
+            double y = grave.getY() - waypoint.getBlockCenteredY();
             double z = grave.getZ() - waypoint.getBlockCenteredZ();
 
             // find the closest waypoint
