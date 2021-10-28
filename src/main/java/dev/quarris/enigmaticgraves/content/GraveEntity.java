@@ -4,11 +4,11 @@ import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import dev.quarris.enigmaticgraves.setup.Registry;
+import dev.quarris.enigmaticgraves.utils.ClientHelper;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.PushReaction;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -81,31 +81,7 @@ public class GraveEntity extends Entity {
 
     @Override
     public boolean isGlowing() {
-        if (this.level.isClientSide) {
-            PlayerEntity player = Minecraft.getInstance().player;
-
-            // Try to find the grave item in one of the hands, prioritising the main hand
-            ItemStack stack = null;
-            if (player.getMainHandItem().getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
-                stack = player.getMainHandItem();
-            }
-            if (stack == null && player.getOffhandItem().getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
-                stack = player.getOffhandItem();
-            }
-
-            // If we don't have a grave finder is any hand, we do not glow the grave
-            if (stack == null)
-                return false;
-
-            boolean hasTag = stack.hasTag() && stack.getTag().contains("GraveUUID");
-            UUID graveUUID = hasTag ? stack.getTag().getUUID("GraveUUID") : null;
-
-            // Can glow if:
-            // In Creative or Spectator,
-            // Or we are the Owner, and the grave finder points to this grave
-            return player.isCreative() || player.isSpectator() || (player.getUUID().equals(this.getOwnerUUID()) && this.getUUID().equals(graveUUID));
-        }
-        return super.isGlowing();
+        return this.level.isClientSide ? ClientHelper.shouldGlowOnClient(this) : super.isGlowing();
     }
 
     @Override
@@ -235,11 +211,6 @@ public class GraveEntity extends Entity {
 
     public String getOwnerName() {
         return this.entityData.get(OWNER_NAME);
-    }
-
-    @Nullable
-    public PlayerEntity getOwner() {
-        return this.entityData.get(OWNER).map(this.level::getPlayerByUUID).orElse(null);
     }
 
     @Nullable
