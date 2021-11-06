@@ -22,7 +22,7 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.6.5'
+version = '1.7.1'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -108,8 +108,8 @@ dependencies {
         annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
     }
     minecraft 'net.minecraftforge:forge:1.16.5-36.1.32'
-    compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.1:api")
+    compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3:api")
     compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
     compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
     compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
@@ -120,8 +120,8 @@ dependencies {
     implementation fg.deobf("be.florens:expandability-forge:2.0.1")
     runtimeOnly fg.deobf('curse.maven:artifacts-312353:3374317')
     runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22")
-
     runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3398000')
+    runtimeOnly fg.deobf('curse.maven:relics-445274:3507284')
 }
 
 jar {

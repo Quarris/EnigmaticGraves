@@ -50,6 +50,7 @@ public class Setup {
                     this.addEntityType(Registry.GRAVE_ENTITY_TYPE, "Grave");
                     this.add("info.grave.remove_grave", "No Grave Location. Right click me (in creative) on a grave to remove it!");
                     this.add("grave.locate", "The grave is at %s");
+                    this.add("info.grave.not_found", "Grave position not found!");
                 }
             });
         }
