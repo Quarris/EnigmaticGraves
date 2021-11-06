@@ -13,6 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import top.theillusivec4.curios.api.CuriosApi;
+import top.theillusivec4.curios.api.type.capability.ICurioItem;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
@@ -87,6 +88,7 @@ public class CurioGraveData implements IGraveData {
                     // then add the grave items to the player inventory instead
                     if (slot >= stacks.getSlots()) {
                         PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, graveItems.get(slot));
+                        return;
                     }
 
                     ItemStack old = stacks.getStacks().getStackInSlot(slot);
@@ -106,6 +108,7 @@ public class CurioGraveData implements IGraveData {
                     // then add the grave items to the player inventory instead
                     if (slot >= stacks.getSlots()) {
                         PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, graveItems.get(slot));
+                        return;
                     }
 
                     ItemStack old = stacks.getCosmeticStacks().getStackInSlot(slot);
