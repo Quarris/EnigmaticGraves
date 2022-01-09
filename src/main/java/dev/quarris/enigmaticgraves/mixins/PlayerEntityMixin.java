@@ -1,7 +1,6 @@
 package dev.quarris.enigmaticgraves.mixins;
 
 import dev.quarris.enigmaticgraves.compat.CompatManager;
-import dev.quarris.enigmaticgraves.compat.CurioCompat;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import net.minecraft.entity.Entity;

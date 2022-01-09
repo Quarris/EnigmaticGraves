@@ -6,6 +6,7 @@ import dev.quarris.enigmaticgraves.content.GraveEntity;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.PlayerGraveEntry;
 import dev.quarris.enigmaticgraves.utils.ModRef;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -14,8 +15,11 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
@@ -25,7 +29,7 @@ import java.util.UUID;
 @Mod.EventBusSubscriber(modid = ModRef.ID)
 public class CommonEvents {
 
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onPlayerDeath(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().level.isClientSide)
             return;
@@ -53,6 +57,14 @@ public class CommonEvents {
         nbt.put("Pos", NBTUtil.writeBlockPos(latestEntry.gravePos));
         nbt.putUUID("GraveUUID", latestEntry.graveUUID);
         event.getPlayer().addItem(graveFinder);
+    }
+
+    @SubscribeEvent
+    public static void addDroppedItems(EntityJoinWorldEvent event) {
+        if (GraveManager.droppedItems != null && event.getEntity() instanceof ItemEntity) {
+            GraveManager.droppedItems.add(((ItemEntity) event.getEntity()).getItem());
+            event.setCanceled(true);
+        }
     }
 
     @SubscribeEvent

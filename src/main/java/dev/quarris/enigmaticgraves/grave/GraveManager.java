@@ -13,8 +13,6 @@ import dev.quarris.enigmaticgraves.grave.data.PlayerInventoryGraveData;
 import dev.quarris.enigmaticgraves.grave.data.CosmeticArmorReworkedGraveData;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.pattern.BlockPattern;
-import net.minecraft.block.pattern.BlockPatternBuilder;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -22,7 +20,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IWorld;
@@ -37,7 +34,8 @@ import java.util.function.Function;
 public class GraveManager {
 
     public static final HashMap<ResourceLocation, Function<CompoundNBT, IGraveData>> GRAVE_DATA_SUPPLIERS = new HashMap<>();
-    public static final HashMap<UUID, PlayerGraveEntry> LATEST_GRAVE_ENTRY = new HashMap<>();
+    public static PlayerGraveEntry latestGraveEntry;
+    public static List<ItemStack> droppedItems;
     public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
 
     public static void init() {
@@ -74,37 +72,37 @@ public class GraveManager {
 
         ModRef.LOGGER.info("Preparing grave for " + player.getName().getString());
         PlayerGraveEntry entry = new PlayerGraveEntry(player.inventory);
-        LATEST_GRAVE_ENTRY.put(player.getUUID(), entry);
+        latestGraveEntry = entry;
+        droppedItems = new ArrayList<>();
     }
 
     public static void populatePlayerGrave(PlayerEntity player, Collection<ItemStack> drops) {
-        if (!LATEST_GRAVE_ENTRY.containsKey(player.getUUID()))
+        if (latestGraveEntry == null)
             return;
 
         ModRef.LOGGER.debug("Populating grave for " + player.getName().getString());
-        PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUUID());
-        generateGraveDataList(player, entry, drops);
+        generateGraveDataList(player, latestGraveEntry, drops);
     }
 
     public static void spawnPlayerGrave(PlayerEntity player) {
-        if (!LATEST_GRAVE_ENTRY.containsKey(player.getUUID()))
+        if (latestGraveEntry == null)
             return;
 
         WorldGraveData worldData = getWorldGraveData(player.level);
-        PlayerGraveEntry entry = LATEST_GRAVE_ENTRY.get(player.getUUID());
-        GraveEntity grave = GraveEntity.createGrave(player, entry.dataList);
+        GraveEntity grave = GraveEntity.createGrave(player, latestGraveEntry.dataList);
         ModRef.LOGGER.debug("Attempting to spawn grave for " + player.getName().getString() + " at " + grave.blockPosition());
-        entry.graveUUID = grave.getUUID();
-        entry.gravePos = grave.blockPosition();
+        latestGraveEntry.graveUUID = grave.getUUID();
+        latestGraveEntry.gravePos = grave.blockPosition();
         if (!player.level.addFreshEntity(grave)) {
             ModRef.LOGGER.warn("Could not spawn grave for " + player.getName().getString());
         } else {
             ModRef.LOGGER.info("Spawned grave for " + player.getName().getString() + " at " + grave.blockPosition());
         }
-        worldData.addGraveEntry(player, entry);
+        worldData.addGraveEntry(player, latestGraveEntry);
         ModRef.LOGGER.info("Added grave entry to player " + player.getName().getString());
 
-        LATEST_GRAVE_ENTRY.remove(player.getUUID());
+        latestGraveEntry = null;
+        droppedItems = null;
     }
 
     public static void generateGraveDataList(PlayerEntity player, PlayerGraveEntry entry, Collection<ItemStack> drops) {
@@ -146,6 +144,7 @@ public class GraveManager {
         }
 
         playerInvData.addRemaining(drops);
+        playerInvData.addRemaining(droppedItems);
         entry.dataList = dataList;
     }
 
