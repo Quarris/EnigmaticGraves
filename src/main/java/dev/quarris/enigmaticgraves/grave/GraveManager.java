@@ -73,7 +73,6 @@ public class GraveManager {
         ModRef.LOGGER.info("Preparing grave for " + player.getName().getString());
         PlayerGraveEntry entry = new PlayerGraveEntry(player.inventory);
         latestGraveEntry = entry;
-        droppedItems = new ArrayList<>();
     }
 
     public static void populatePlayerGrave(PlayerEntity player, Collection<ItemStack> drops) {

@@ -39,7 +39,7 @@ public class PlayerInventoryGraveData implements IGraveData {
             Iterator<ItemStack> ite = drops.iterator();
             while (ite.hasNext()) {
                 ItemStack drop = ite.next();
-                if (ItemStack.isSame(stack, drop)) {
+                if (ItemStack.matches(stack, drop)) {
                     ite.remove();
                     continue loop;
                 }

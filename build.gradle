@@ -22,7 +22,7 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.7.2'
+version = '1.7.3'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -123,6 +123,8 @@ dependencies {
     runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3398000')
     runtimeOnly fg.deobf('curse.maven:relics-445274:3507284')
     runtimeOnly fg.deobf('curse.maven:travelers-backpack-321117:3596417')
+    runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
+    runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
 }
 
 jar {

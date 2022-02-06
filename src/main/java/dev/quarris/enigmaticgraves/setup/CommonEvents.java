@@ -23,16 +23,32 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = ModRef.ID)
 public class CommonEvents {
 
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void onPlayerDeath(LivingDeathEvent event) {
+    // Start collecting dropped items from mods at the start of the player death event.
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void onPlayerDeathFirst(LivingDeathEvent event) {
         if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().level.isClientSide)
             return;
+
+        GraveManager.droppedItems = new ArrayList<>();
+    }
+
+    // Once everything is collected, check to see if someone has cancelled the event, if it was cancelled then the player has not actually died, and we have to ignore any items we have collected.
+    @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
+    public static void onPlayerDeathLast(LivingDeathEvent event) {
+        if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().level.isClientSide)
+            return;
+
+        if (event.isCanceled()) {
+            GraveManager.droppedItems = null;
+            return;
+        }
 
         PlayerEntity player = (PlayerEntity) event.getEntityLiving();
         GraveManager.prepPlayerGrave(player);
