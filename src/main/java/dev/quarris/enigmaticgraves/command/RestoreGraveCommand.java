@@ -10,23 +10,23 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.PlayerGraveEntry;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.Commands;
-import net.minecraft.command.arguments.EntityArgument;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class RestoreGraveCommand {
 
-    private static final SuggestionProvider<CommandSource> SUGGEST_ENTRIES = (ctx, builder) -> {
+    private static final SuggestionProvider<CommandSourceStack> SUGGEST_ENTRIES = (ctx, builder) -> {
         try {
-            ServerPlayerEntity player = ctx.getSource().getPlayerOrException();
+            ServerPlayer player = ctx.getSource().getPlayerOrException();
             LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID());
             if (entries == null) {
                 return Suggestions.empty();
@@ -39,9 +39,9 @@ public class RestoreGraveCommand {
         return builder.buildFuture();
     };
 
-    private static final ITextComponent GRAVE_ALREADY_RESTORED = new StringTextComponent("Warning: That grave has already been restored. Add 'true' at the end of the last command to restore again.");
-    private static final ITextComponent SUCCESSFULLY_RESTORED = new StringTextComponent("Successfully restored the grave.");
-    private static final ITextComponent HELP = new StringTextComponent(TextFormatting.RED +
+    private static final Component GRAVE_ALREADY_RESTORED = new TextComponent("Warning: That grave has already been restored. Add 'true' at the end of the last command to restore again.");
+    private static final Component SUCCESSFULLY_RESTORED = new TextComponent("Successfully restored the grave.");
+    private static final Component HELP = new TextComponent(ChatFormatting.RED +
         "Usage:\n" +
         "/enigmatic_graves <player> list\n" +
         "/enigmatic_graves <player> clear\n" +
@@ -49,8 +49,8 @@ public class RestoreGraveCommand {
     );
 
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralCommandNode<CommandSource> cmd = dispatcher
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralCommandNode<CommandSourceStack> cmd = dispatcher
             .register(Commands.literal("enigmatic_graves")
                 .requires(source -> source.hasPermission(2))
                 .executes(ctx -> {
@@ -59,10 +59,10 @@ public class RestoreGraveCommand {
                 })
                 .then(Commands.argument("target", EntityArgument.player())
                     .then(Commands.literal("list").executes(ctx -> {
-                        ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
+                        ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
                         List<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(ctx.getSource().getLevel()).getGraveEntriesForPlayer(player.getUUID());
                         if (entries == null) {
-                            ctx.getSource().sendSuccess(new StringTextComponent("The player has no deaths."), false);
+                            ctx.getSource().sendSuccess(new TextComponent("The player has no deaths."), false);
                             return 0;
                         }
                         StringBuilder sb = new StringBuilder();
@@ -72,7 +72,7 @@ public class RestoreGraveCommand {
                                 sb.append('\n');
                             }
                         }
-                        ctx.getSource().sendSuccess(new StringTextComponent(sb.toString()), false);
+                        ctx.getSource().sendSuccess(new TextComponent(sb.toString()), false);
                         return 0;
                     }))
                     .then(Commands.literal("restore")
@@ -86,10 +86,10 @@ public class RestoreGraveCommand {
                                 .executes(ctx -> restoreGrave(ctx, true, BoolArgumentType.getBool(ctx, "forced"))))))
                     .then(Commands.literal("clear")
                         .executes(ctx -> {
-                            ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
+                            ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
                             int count = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID()).size();
                             GraveManager.getWorldGraveData(player.level).clearGraveEntries(player);
-                            ctx.getSource().sendSuccess(new StringTextComponent("Cleared " + count + " entries."), true);
+                            ctx.getSource().sendSuccess(new TextComponent("Cleared " + count + " entries."), true);
                             return 0;
                         }))));
 
@@ -101,8 +101,8 @@ public class RestoreGraveCommand {
             }).redirect(cmd));
     }
 
-    private static int restoreGrave(CommandContext<CommandSource> ctx, boolean useArg, boolean forced) throws CommandSyntaxException {
-        ServerPlayerEntity player = EntityArgument.getPlayer(ctx, "target");
+    private static int restoreGrave(CommandContext<CommandSourceStack> ctx, boolean useArg, boolean forced) throws CommandSyntaxException {
+        ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
         PlayerGraveEntry entry;
         if (useArg) {
             entry = GraveEntryType.getEntry(player.getUUID(), ctx, "entry");
@@ -118,7 +118,7 @@ public class RestoreGraveCommand {
         return 0;
     }
 
-    private static boolean tryRestoreGrave(PlayerGraveEntry graveEntry, PlayerEntity player, boolean forced) {
+    private static boolean tryRestoreGrave(PlayerGraveEntry graveEntry, Player player, boolean forced) {
         // if !forced then check if the grave has already been recovered in world
         // if it has, then return false, else restore the graves and return true
         if (!forced && graveEntry.isRestored()) {

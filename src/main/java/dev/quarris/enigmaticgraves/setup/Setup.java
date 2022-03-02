@@ -3,24 +3,27 @@ package dev.quarris.enigmaticgraves.setup;
 import dev.quarris.enigmaticgraves.compat.CompatManager;
 import dev.quarris.enigmaticgraves.content.GraveEntityRenderer;
 import dev.quarris.enigmaticgraves.utils.ModRef;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.model.generators.ItemModelProvider;
 import net.minecraftforge.common.data.LanguageProvider;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.InterModComms;
-import net.minecraftforge.fml.client.registry.RenderingRegistry;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.GatherDataEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
+import net.minecraftforge.forge.event.lifecycle.GatherDataEvent;
 
 @Mod.EventBusSubscriber(modid = ModRef.ID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class Setup {
 
     @SubscribeEvent
-    public static void clientSetup(FMLClientSetupEvent event) {
-        RenderingRegistry.registerEntityRenderingHandler(Registry.GRAVE_ENTITY_TYPE.get(), GraveEntityRenderer::new);
+    public static void registerEntityRenderer(EntityRenderersEvent.RegisterRenderers event) {
+        event.registerEntityRenderer(Registry.GRAVE_ENTITY_TYPE.get(), GraveEntityRenderer::new);
+    }
+
+    @SubscribeEvent
+    public static void registerGraveModelLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
+
     }
 
     @SubscribeEvent

@@ -1,14 +1,16 @@
 package dev.quarris.enigmaticgraves.grave.data;
 
-import dev.quarris.enigmaticgraves.utils.*;
-import lain.mods.cos.api.*;
-import lain.mods.cos.api.inventory.*;
-import net.minecraft.entity.player.*;
-import net.minecraft.item.*;
-import net.minecraft.nbt.*;
-import net.minecraft.util.*;
+import dev.quarris.enigmaticgraves.utils.ModRef;
+import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
+import lain.mods.cos.api.CosArmorAPI;
+import lain.mods.cos.api.inventory.CAStacksBase;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
 
 public class CosmeticArmorReworkedGraveData implements IGraveData {
 
@@ -31,12 +33,12 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
         }
     }
 
-    public CosmeticArmorReworkedGraveData(CompoundNBT nbt) {
+    public CosmeticArmorReworkedGraveData(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 
     @Override
-    public void restore(PlayerEntity player) {
+    public void restore(Player player) {
         CAStacksBase lowPrio = CosArmorAPI.getCAStacks(player.getUUID());
 
         for (int slot = 0; slot < 4; slot++){
@@ -62,13 +64,13 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundTag write(CompoundTag nbt) {
         nbt.put("caStacksBase", caStacksBase.serializeNBT());
         return nbt;
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
+    public void read(CompoundTag nbt) {
         caStacksBase.deserializeNBT(nbt.getCompound("caStacksBase"));
     }
 }

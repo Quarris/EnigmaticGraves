@@ -11,11 +11,11 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.PlayerGraveEntry;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.SuggestionProviders;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -27,7 +27,7 @@ public class GraveEntryType implements ArgumentType<Integer> {
 
     private static final Pattern PATTERN = Pattern.compile("death_(\\d){1,3}.*");
 
-    public static PlayerGraveEntry getEntry(UUID playerUUID, CommandContext<CommandSource> context, String name) {
+    public static PlayerGraveEntry getEntry(UUID playerUUID, CommandContext<CommandSourceStack> context, String name) {
         int deathId = context.getArgument(name, Integer.class);
         return GraveManager.getWorldGraveData(context.getSource().getLevel())
                 .getGraveEntriesForPlayer(playerUUID)
@@ -39,13 +39,13 @@ public class GraveEntryType implements ArgumentType<Integer> {
         String input = reader.readString();
         Matcher matcher = PATTERN.matcher(input);
         if (!matcher.matches() || matcher.groupCount() <= 0) {
-            Message msg = new StringTextComponent("Input does not match pattern 'death_<id>...'");
+            Message msg = new TextComponent("Input does not match pattern 'death_<id>...'");
             throw new CommandSyntaxException(new SimpleCommandExceptionType(msg), msg);
         }
         try {
             return Integer.parseInt(matcher.group(1));
         } catch (NumberFormatException e) {
-            Message msg = new StringTextComponent("Invalid death id");
+            Message msg = new TextComponent("Invalid death id");
             throw new CommandSyntaxException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidInt(), msg, input, matcher.start(1));
         }
     }
@@ -54,12 +54,12 @@ public class GraveEntryType implements ArgumentType<Integer> {
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         if (context.getSource() instanceof ClientSuggestionProvider) {
             try {
-                return SuggestionProviders.ASK_SERVER.getSuggestions((CommandContext<ISuggestionProvider>) context, builder);
+                return SuggestionProviders.ASK_SERVER.getSuggestions((CommandContext<SharedSuggestionProvider>) context, builder);
             } catch (CommandSyntaxException e) { }
         }
-        if (context.getSource() instanceof CommandSource) {
+        if (context.getSource() instanceof CommandSourceStack) {
             try {
-                ServerPlayerEntity player = ((CommandSource) context.getSource()).getPlayerOrException();
+                ServerPlayer player = ((CommandSourceStack) context.getSource()).getPlayerOrException();
                 LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID());
                 if (entries == null) {
                     return Suggestions.empty();

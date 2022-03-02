@@ -6,27 +6,27 @@ import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import dev.quarris.enigmaticgraves.setup.Registry;
 import dev.quarris.enigmaticgraves.utils.ClientHelper;
 import dev.quarris.enigmaticgraves.utils.ModRef;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.PushReaction;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.datasync.DataParameter;
-import net.minecraft.network.datasync.DataSerializers;
-import net.minecraft.network.datasync.EntityDataManager;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.fmllegacy.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -37,15 +37,15 @@ import java.util.UUID;
 
 public class GraveEntity extends Entity {
 
-    private static final DataParameter<Optional<UUID>> OWNER = EntityDataManager.defineId(GraveEntity.class, DataSerializers.OPTIONAL_UUID);
-    private static final DataParameter<String> OWNER_NAME = EntityDataManager.defineId(GraveEntity.class, DataSerializers.STRING);
+    private static final EntityDataAccessor<Optional<UUID>> OWNER = SynchedEntityData.defineId(GraveEntity.class, EntityDataSerializers.OPTIONAL_UUID);
+    private static final EntityDataAccessor<String> OWNER_NAME = SynchedEntityData.defineId(GraveEntity.class, EntityDataSerializers.STRING);
 
     private List<IGraveData> contents = new ArrayList<>();
     private boolean restored;
 
-    public static GraveEntity createGrave(PlayerEntity player, List<IGraveData> graveData) {
+    public static GraveEntity createGrave(Player player, List<IGraveData> graveData) {
         GraveEntity grave = new GraveEntity(player);
-        BlockPos.Mutable spawnPos = new BlockPos.Mutable();
+        BlockPos.MutableBlockPos spawnPos = new BlockPos.MutableBlockPos();
         boolean spawnBlockBelow = GraveManager.getSpawnPosition(player.level, player.position(), spawnPos);
         if (spawnBlockBelow) {
             ResourceLocation blockName = new ResourceLocation(GraveConfigs.COMMON.graveFloorBlock.get());
@@ -53,17 +53,17 @@ public class GraveEntity extends Entity {
             player.level.setBlock(spawnPos.below(), state, 3);
             player.level.levelEvent(2001, spawnPos, Block.getId(state));
         }
-        grave.setRot(player.xRot, 0);
+        grave.setRot(player.getXRot(), 0);
         grave.setPos(spawnPos.getX() + player.getBbWidth() / 2, spawnPos.getY(), spawnPos.getZ() + player.getBbWidth() / 2);
         grave.setContents(graveData);
         return grave;
     }
 
-    public GraveEntity(EntityType<?> entityTypeIn, World worldIn) {
+    public GraveEntity(EntityType<?> entityTypeIn, Level worldIn) {
         super(entityTypeIn, worldIn);
     }
 
-    public GraveEntity(PlayerEntity player) {
+    public GraveEntity(Player player) {
         this(Registry.GRAVE_ENTITY_TYPE.get(), player.level);
         this.setOwner(player);
     }
@@ -72,7 +72,7 @@ public class GraveEntity extends Entity {
     public void tick() {
         if (!this.level.isClientSide()) {
             if (GraveManager.getWorldGraveData(this.level).isGraveRestored(this.getUUID())) {
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
                 GraveManager.getWorldGraveData(this.level).removeGraveRestored(this.getUUID());
             }
         }
@@ -80,8 +80,8 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    public boolean isGlowing() {
-        return this.level.isClientSide ? ClientHelper.shouldGlowOnClient(this) : super.isGlowing();
+    public boolean isCurrentlyGlowing() {
+        return this.level.isClientSide ? ClientHelper.shouldGlowOnClient(this) : super.isCurrentlyGlowing();
     }
 
     @Override
@@ -96,7 +96,7 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    public void playerTouch(PlayerEntity player) {
+    public void playerTouch(Player player) {
         if (player.isShiftKeyDown()) {
             if (this.belongsTo(player)) {
                 this.restoreGrave(player);
@@ -105,36 +105,36 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    public ActionResultType interact(PlayerEntity player, Hand hand) {
+    public InteractionResult interact(Player player, InteractionHand hand) {
         if (this.belongsTo(player)) {
             this.restoreGrave(player);
-            return ActionResultType.sidedSuccess(this.level.isClientSide);
+            return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
 
         if (player.isCreative()) {
             ItemStack heldItem = player.getItemInHand(hand);
             if (heldItem.getItem() == Registry.GRAVE_FINDER_ITEM.get() && !heldItem.hasTag()) {
                 this.remove();
-                return ActionResultType.sidedSuccess(this.level.isClientSide);
+                return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
         }
 
-        return ActionResultType.PASS;
+        return InteractionResult.PASS;
     }
 
-    private void restoreGrave(PlayerEntity player) {
+    private void restoreGrave(Player player) {
         if (!this.isAlive() || this.level.isClientSide())
             return;
 
         // Remove the corresponding grave finder from the player inventory
-        for (int slot = 0; slot < player.inventory.getContainerSize(); slot++) {
-            ItemStack stack = player.inventory.getItem(slot);
+        for (int slot = 0; slot < player.getInventory().getContainerSize(); slot++) {
+            ItemStack stack = player.getInventory().getItem(slot);
             if (stack.getItem() == Registry.GRAVE_FINDER_ITEM.get()) {
                 if (stack.hasTag()) {
-                    CompoundNBT nbt = stack.getTag();
+                    CompoundTag nbt = stack.getTag();
                     if (nbt != null && nbt.contains("GraveUUID")) {
                         if (nbt.getUUID("GraveUUID").equals(this.getUUID())) {
-                            player.inventory.setItem(slot, ItemStack.EMPTY);
+                            player.getInventory().setItem(slot, ItemStack.EMPTY);
                             break;
                         }
                     }
@@ -151,21 +151,21 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    public void remove() {
-        super.remove();
+    public void remove(RemovalReason reason) {
+        super.remove(reason);
         if (!this.level.isClientSide && !this.restored) {
             ModRef.LOGGER.warn("Grave at {} was removed without being restored!", this.blockPosition());
         }
     }
 
-    private boolean belongsTo(PlayerEntity player) {
+    private boolean belongsTo(Player player) {
         return player.getUUID().equals(this.getOwnerUUID());
     }
 
     @Override
-    protected void addAdditionalSaveData(CompoundNBT compound) {
-        CompoundNBT graveNBT = new CompoundNBT();
-        ListNBT contentNBT = new ListNBT();
+    protected void addAdditionalSaveData(CompoundTag compound) {
+        CompoundTag graveNBT = new CompoundTag();
+        ListTag contentNBT = new ListTag();
         for (IGraveData data : this.contents) {
             contentNBT.add(data.serializeNBT());
         }
@@ -180,13 +180,13 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    protected void readAdditionalSaveData(CompoundNBT compound) {
-        CompoundNBT graveNBT = compound.getCompound("Grave");
+    protected void readAdditionalSaveData(CompoundTag compound) {
+        CompoundTag graveNBT = compound.getCompound("Grave");
 
         List<IGraveData> dataList = new ArrayList<>();
-        ListNBT contentNBT = graveNBT.getList("Content", Constants.NBT.TAG_COMPOUND);
-        for (INBT inbt : contentNBT) {
-            CompoundNBT dataNBT = (CompoundNBT) inbt;
+        ListTag contentNBT = graveNBT.getList("Content", Constants.NBT.TAG_COMPOUND);
+        for (Tag inbt : contentNBT) {
+            CompoundTag dataNBT = (CompoundTag) inbt;
             ResourceLocation name = new ResourceLocation(dataNBT.getString("Name"));
             IGraveData data = GraveManager.GRAVE_DATA_SUPPLIERS.get(name).apply(dataNBT);
             dataList.add(data);
@@ -204,7 +204,7 @@ public class GraveEntity extends Entity {
         this.contents = contents;
     }
 
-    public void setOwner(PlayerEntity owner) {
+    public void setOwner(Player owner) {
         this.entityData.set(OWNER, Optional.of(owner.getUUID()));
         this.entityData.set(OWNER_NAME, owner.getName().getString());
     }
@@ -224,7 +224,7 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    public IPacket<?> getAddEntityPacket() {
+    public Packet<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 }

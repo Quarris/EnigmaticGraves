@@ -4,13 +4,13 @@ buildscript {
         maven {
             name "Sponge"
             url "https://repo.spongepowered.org/repository/maven-public/"
-            content { includeGroup "org.spongepowered" }
+            //content { includeGroup "org.spongepowered" }
         }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+        classpath 'org.spongepowered:mixingradle:0.7.+'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
@@ -22,15 +22,15 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.7.3'
+version = '1.17-1.7.3'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(16) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: 'official', version: '1.17.1'
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -96,35 +96,35 @@ repositories {
 
     maven { // TOP
         name 'tterrag maven'
-        url "https://maven.tterrag.com/"
+        url "https://maven.k-4u.nl"
     }
     maven { url "https://maven.tehnut.info" } // HWYLA
-
-    flatDir { dirs 'mods' }
 }
 
 dependencies {
     if (System.getProperty("idea.sync.active") != "true") {
-        annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
+        annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     }
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.32'
-    compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3:api")
-    compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
-    compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
-    compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
+    minecraft 'net.minecraftforge:forge:1.17.1-37.0.34'
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.2.7")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.2.7:api")
+    compileOnly "mcjty.theoneprobe:theoneprobe:1.17-4.0.2-3:api"
+    implementation "mcjty.theoneprobe:theoneprobe:1.17-4.0.2-3"
+
+    //compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
+    compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3595627'
 
     // Testing Dependencies
-    runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')
-    runtimeOnly fg.deobf('curse.maven:ensorcellation-349447:3246996')
-    implementation fg.deobf("be.florens:expandability-forge:2.0.1")
-    runtimeOnly fg.deobf('curse.maven:artifacts-312353:3374317')
-    runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22")
-    runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3398000')
-    runtimeOnly fg.deobf('curse.maven:relics-445274:3507284')
-    runtimeOnly fg.deobf('curse.maven:travelers-backpack-321117:3596417')
-    runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
-    runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
+    //runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')
+    //runtimeOnly fg.deobf('curse.maven:ensorcellation-349447:3246996')
+    implementation fg.deobf("be.florens:expandability-forge:4.0.2")
+    runtimeOnly fg.deobf('curse.maven:artifacts-312353:3578539')
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.2.7")
+    runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3595626')
+    //runtimeOnly fg.deobf('curse.maven:relics-445274:3507284')
+    runtimeOnly fg.deobf('curse.maven:travelers-backpack-321117:3596420')
+    //runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
+    //runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
 }
 
 jar {
@@ -137,7 +137,7 @@ jar {
                 "Implementation-Version"  : "${version}",
                 "Implementation-Vendor"   : "quarris",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConnector": "dev.quarris.enigmaticgraves.MixinConnector"
+                "MixinConnector"          : "dev.quarris.enigmaticgraves.MixinConnector"
         ])
     }
 }

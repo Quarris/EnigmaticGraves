@@ -2,18 +2,17 @@ package dev.quarris.enigmaticgraves.grave.data;
 
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import top.theillusivec4.curios.api.CuriosApi;
-import top.theillusivec4.curios.api.type.capability.ICurioItem;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 
@@ -68,12 +67,12 @@ public class CurioGraveData implements IGraveData {
         }
     }
 
-    public CurioGraveData(CompoundNBT nbt) {
+    public CurioGraveData(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 
     @Override
-    public void restore(PlayerEntity player) {
+    public void restore(Player player) {
         LazyOptional<ICuriosItemHandler> optional = CuriosApi.getCuriosHelper().getCuriosHandler(player);
         optional.ifPresent(handler -> {
             Map<String, ICurioStacksHandler> curios = handler.getCurios();
@@ -127,23 +126,23 @@ public class CurioGraveData implements IGraveData {
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
-        ListNBT stacksNBT = new ListNBT();
+    public CompoundTag write(CompoundTag nbt) {
+        ListTag stacksNBT = new ListTag();
         for (Map.Entry<String, NonNullList<ItemStack>> entry : this.curioStacks.entrySet()) {
-            CompoundNBT entryNBT = new CompoundNBT();
+            CompoundTag entryNBT = new CompoundTag();
             entryNBT.putString("ID", entry.getKey());
             entryNBT.putInt("Size", entry.getValue().size());
-            entryNBT.put("Stacks", ItemStackHelper.saveAllItems(new CompoundNBT(), entry.getValue()));
+            entryNBT.put("Stacks", ContainerHelper.saveAllItems(new CompoundTag(), entry.getValue()));
             stacksNBT.add(entryNBT);
         }
         nbt.put("Stacks", stacksNBT);
 
-        ListNBT cosmeticStacksNBT = new ListNBT();
+        ListTag cosmeticStacksNBT = new ListTag();
         for (Map.Entry<String, NonNullList<ItemStack>> entry : this.curioCosmeticStacks.entrySet()) {
-            CompoundNBT entryNBT = new CompoundNBT();
+            CompoundTag entryNBT = new CompoundTag();
             entryNBT.putString("ID", entry.getKey());
             entryNBT.putInt("Size", entry.getValue().size());
-            entryNBT.put("Stacks", ItemStackHelper.saveAllItems(new CompoundNBT(), entry.getValue()));
+            entryNBT.put("Stacks", ContainerHelper.saveAllItems(new CompoundTag(), entry.getValue()));
             cosmeticStacksNBT.add(entryNBT);
         }
         nbt.put("CosmeticStacks", cosmeticStacksNBT);
@@ -152,22 +151,22 @@ public class CurioGraveData implements IGraveData {
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
-        ListNBT stacksNBT = nbt.getList("Stacks", Constants.NBT.TAG_COMPOUND);
-        for (INBT inbt : stacksNBT) {
-            CompoundNBT entryNBT = (CompoundNBT) inbt;
+    public void read(CompoundTag nbt) {
+        ListTag stacksNBT = nbt.getList("Stacks", Constants.NBT.TAG_COMPOUND);
+        for (Tag inbt : stacksNBT) {
+            CompoundTag entryNBT = (CompoundTag) inbt;
             String id = entryNBT.getString("ID");
             NonNullList<ItemStack> stacks = NonNullList.withSize(entryNBT.getInt("Size"), ItemStack.EMPTY);
-            ItemStackHelper.loadAllItems(entryNBT.getCompound("Stacks"), stacks);
+            ContainerHelper.loadAllItems(entryNBT.getCompound("Stacks"), stacks);
             this.curioStacks.put(id, stacks);
         }
 
-        ListNBT cosmeticStacksNBT = nbt.getList("CosmeticStacks", Constants.NBT.TAG_COMPOUND);
-        for (INBT inbt : cosmeticStacksNBT) {
-            CompoundNBT entryNBT = (CompoundNBT) inbt;
+        ListTag cosmeticStacksNBT = nbt.getList("CosmeticStacks", Constants.NBT.TAG_COMPOUND);
+        for (Tag inbt : cosmeticStacksNBT) {
+            CompoundTag entryNBT = (CompoundTag) inbt;
             String id = entryNBT.getString("ID");
             NonNullList<ItemStack> stacks = NonNullList.withSize(entryNBT.getInt("Size"), ItemStack.EMPTY);
-            ItemStackHelper.loadAllItems(entryNBT.getCompound("Stacks"), stacks);
+            ContainerHelper.loadAllItems(entryNBT.getCompound("Stacks"), stacks);
             this.curioCosmeticStacks.put(id, stacks);
         }
     }

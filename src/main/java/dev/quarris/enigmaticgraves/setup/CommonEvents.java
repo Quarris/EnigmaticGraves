@@ -2,30 +2,28 @@ package dev.quarris.enigmaticgraves.setup;
 
 import dev.quarris.enigmaticgraves.command.RestoreGraveCommand;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
-import dev.quarris.enigmaticgraves.content.GraveEntity;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.PlayerGraveEntry;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.Player;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
-import java.util.UUID;
 
 @Mod.EventBusSubscriber(modid = ModRef.ID)
 public class CommonEvents {
@@ -33,7 +31,7 @@ public class CommonEvents {
     // Start collecting dropped items from mods at the start of the player death event.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerDeathFirst(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().level.isClientSide)
+        if (!(event.getEntity() instanceof Player) || event.getEntity().level.isClientSide)
             return;
 
         GraveManager.droppedItems = new ArrayList<>();
@@ -42,7 +40,7 @@ public class CommonEvents {
     // Once everything is collected, check to see if someone has cancelled the event, if it was cancelled then the player has not actually died, and we have to ignore any items we have collected.
     @SubscribeEvent(priority = EventPriority.LOWEST, receiveCanceled = true)
     public static void onPlayerDeathLast(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().level.isClientSide)
+        if (!(event.getEntity() instanceof Player) || event.getEntity().level.isClientSide)
             return;
 
         if (event.isCanceled()) {
@@ -50,7 +48,7 @@ public class CommonEvents {
             return;
         }
 
-        PlayerEntity player = (PlayerEntity) event.getEntityLiving();
+        Player player = (Player) event.getEntityLiving();
         GraveManager.prepPlayerGrave(player);
     }
 
@@ -69,8 +67,8 @@ public class CommonEvents {
             return;
 
         PlayerGraveEntry latestEntry = entries.getFirst();
-        CompoundNBT nbt = graveFinder.getOrCreateTag();
-        nbt.put("Pos", NBTUtil.writeBlockPos(latestEntry.gravePos));
+        CompoundTag nbt = graveFinder.getOrCreateTag();
+        nbt.put("Pos", NbtUtils.writeBlockPos(latestEntry.gravePos));
         nbt.putUUID("GraveUUID", latestEntry.graveUUID);
         event.getPlayer().addItem(graveFinder);
     }

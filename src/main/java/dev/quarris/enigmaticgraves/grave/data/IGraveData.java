@@ -1,27 +1,27 @@
 package dev.quarris.enigmaticgraves.grave.data;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.util.INBTSerializable;
 
-public interface IGraveData extends INBTSerializable<CompoundNBT> {
+public interface IGraveData extends INBTSerializable<CompoundTag> {
 
-    void restore(PlayerEntity player);
+    void restore(Player player);
     ResourceLocation getName();
 
-    CompoundNBT write(CompoundNBT nbt);
-    void read(CompoundNBT nbt);
+    CompoundTag write(CompoundTag nbt);
+    void read(CompoundTag nbt);
 
     @Override
-    default CompoundNBT serializeNBT() {
-        CompoundNBT nbt = new CompoundNBT();
+    default CompoundTag serializeNBT() {
+        CompoundTag nbt = new CompoundTag();
         nbt.putString("Name", this.getName().toString());
         return this.write(nbt);
     }
 
     @Override
-    default void deserializeNBT(CompoundNBT nbt) {
+    default void deserializeNBT(CompoundTag nbt) {
         this.read(nbt);
     }
 }

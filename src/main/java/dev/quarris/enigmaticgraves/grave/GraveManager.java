@@ -1,30 +1,26 @@
 package dev.quarris.enigmaticgraves.grave;
 
 import dev.quarris.enigmaticgraves.compat.CompatManager;
-import dev.quarris.enigmaticgraves.compat.CurioCompat;
 import dev.quarris.enigmaticgraves.compat.CosmeticArmorReworkedCompat;
+import dev.quarris.enigmaticgraves.compat.CurioCompat;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.config.GraveConfigs.Common.ExperienceHandling;
 import dev.quarris.enigmaticgraves.content.GraveEntity;
-import dev.quarris.enigmaticgraves.grave.data.CurioGraveData;
-import dev.quarris.enigmaticgraves.grave.data.ExperienceGraveData;
-import dev.quarris.enigmaticgraves.grave.data.IGraveData;
-import dev.quarris.enigmaticgraves.grave.data.PlayerInventoryGraveData;
-import dev.quarris.enigmaticgraves.grave.data.CosmeticArmorReworkedGraveData;
+import dev.quarris.enigmaticgraves.grave.data.*;
 import dev.quarris.enigmaticgraves.utils.ModRef;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.GameRules;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -33,7 +29,7 @@ import java.util.function.Function;
 
 public class GraveManager {
 
-    public static final HashMap<ResourceLocation, Function<CompoundNBT, IGraveData>> GRAVE_DATA_SUPPLIERS = new HashMap<>();
+    public static final HashMap<ResourceLocation, Function<CompoundTag, IGraveData>> GRAVE_DATA_SUPPLIERS = new HashMap<>();
     public static PlayerGraveEntry latestGraveEntry;
     public static List<ItemStack> droppedItems;
     public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
@@ -49,33 +45,33 @@ public class GraveManager {
         }
     }
 
-    public static WorldGraveData getWorldGraveData(IWorld world) {
-        if (world instanceof ServerWorld) {
-            MinecraftServer server = ((ServerWorld) world).getServer();
-            ServerWorld overworld = server.getLevel(World.OVERWORLD);
-            return overworld.getDataStorage().computeIfAbsent(WorldGraveData::new, WorldGraveData.NAME);
+    public static WorldGraveData getWorldGraveData(LevelAccessor world) {
+        if (world instanceof ServerLevel) {
+            MinecraftServer server = ((ServerLevel) world).getServer();
+            ServerLevel overworld = server.getLevel(Level.OVERWORLD);
+            return overworld.getDataStorage().computeIfAbsent(WorldGraveData::load, WorldGraveData::new, WorldGraveData.NAME);
         }
 
         return null;
     }
 
-    public static boolean shouldSpawnGrave(PlayerEntity player) {
+    public static boolean shouldSpawnGrave(Player player) {
         return !player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator();
 
     }
 
-    public static void prepPlayerGrave(PlayerEntity player) {
+    public static void prepPlayerGrave(Player player) {
         if (!shouldSpawnGrave(player)) {
             ModRef.LOGGER.info("Cannot spawn grave. Player is spectator is the KEEP_INVENTORY gamerule is enabled");
             return;
         }
 
         ModRef.LOGGER.info("Preparing grave for " + player.getName().getString());
-        PlayerGraveEntry entry = new PlayerGraveEntry(player.inventory);
+        PlayerGraveEntry entry = new PlayerGraveEntry(player.getInventory());
         latestGraveEntry = entry;
     }
 
-    public static void populatePlayerGrave(PlayerEntity player, Collection<ItemStack> drops) {
+    public static void populatePlayerGrave(Player player, Collection<ItemStack> drops) {
         if (latestGraveEntry == null)
             return;
 
@@ -83,7 +79,7 @@ public class GraveManager {
         generateGraveDataList(player, latestGraveEntry, drops);
     }
 
-    public static void spawnPlayerGrave(PlayerEntity player) {
+    public static void spawnPlayerGrave(Player player) {
         if (latestGraveEntry == null)
             return;
 
@@ -104,7 +100,7 @@ public class GraveManager {
         droppedItems = null;
     }
 
-    public static void generateGraveDataList(PlayerEntity player, PlayerGraveEntry entry, Collection<ItemStack> drops) {
+    public static void generateGraveDataList(Player player, PlayerGraveEntry entry, Collection<ItemStack> drops) {
         List<IGraveData> dataList = new ArrayList<>();
         PlayerInventoryGraveData playerInvData = new PlayerInventoryGraveData(entry.inventory, drops);
         dataList.add(playerInvData);
@@ -113,7 +109,7 @@ public class GraveManager {
         if (xpHandling != ExperienceHandling.DROP) {
             int xp = 0; // if (xpHandling == ExperienceHandling.REMOVE)
             if (xpHandling == ExperienceHandling.KEEP_VANILLA) {
-                // The 'player' param is not used for PlayerEntity, using ourselves to prevent random NPE crashes from possible mixins
+                // The 'player' param is not used for Player, using ourselves to prevent random NPE crashes from possible mixins
                 xp = player.getExperienceReward(player);
                 xp = net.minecraftforge.event.ForgeEventFactory.getExperienceDrop(player, player, xp);
             } else if (xpHandling == ExperienceHandling.KEEP_ALL) {
@@ -163,11 +159,11 @@ public class GraveManager {
      * @param outPos The block position to place the grave at.
      * @return true to also spawn a block below the grave.
      */
-    public static boolean getSpawnPosition(World world, Vector3d deathPos, BlockPos.Mutable outPos) {
+    public static boolean getSpawnPosition(Level world, Vec3 deathPos, BlockPos.MutableBlockPos outPos) {
         GraveConfigs.Common configs = GraveConfigs.COMMON;
         // First, try to find the first non-air block below the death point
         // and return the air block above that.
-        for (BlockPos.Mutable pos = new BlockPos(deathPos.x, Math.round(deathPos.y), deathPos.z).mutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
+        for (BlockPos.MutableBlockPos pos = new BlockPos(deathPos.x, Math.round(deathPos.y), deathPos.z).mutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
             BlockPos belowPos = new BlockPos(pos).below();
             BlockState belowState = world.getBlockState(belowPos);
             if (blocksMovement(belowState)) {

@@ -1,14 +1,9 @@
 package dev.quarris.enigmaticgraves.compat;
 
-import dev.quarris.enigmaticgraves.content.GraveEntity;
-import mcp.mobius.waila.Waila;
-import mcp.mobius.waila.api.*;
-import mcp.mobius.waila.utils.ModIdentification;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+public class WailaCompat {
 
-import java.util.List;
-
+}
+/* Waila is not updated past 1.16
 @WailaPlugin
 public class WailaCompat implements IWailaPlugin {
     @Override
@@ -35,4 +30,4 @@ public class WailaCompat implements IWailaPlugin {
             tooltip.add(new StringTextComponent(String.format(Waila.CONFIG.get().getFormatting().getModName(), ModIdentification.getModInfo(accessor.getEntity()).getName())));
         }
     }
-}
+ */

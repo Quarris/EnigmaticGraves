@@ -1,14 +1,14 @@
 package dev.quarris.enigmaticgraves.utils;
 
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
 public class PlayerInventoryExtensions {
 
-    public static void tryAddItemToPlayerInvElseDrop(PlayerEntity player, int slot, ItemStack stack) {
-        if (!PlayerInventoryExtensions.addItemToPlayerInventory(player.inventory, slot, stack)) {
+    public static void tryAddItemToPlayerInvElseDrop(Player player, int slot, ItemStack stack) {
+        if (!PlayerInventoryExtensions.addItemToPlayerInventory(player.getInventory(), slot, stack)) {
             ItemEntity itemEntity = player.spawnAtLocation(stack);
             itemEntity.setDeltaMovement(0, 0, 0);
             itemEntity.hasImpulse = true;
@@ -19,7 +19,7 @@ public class PlayerInventoryExtensions {
      * Adds the stack to the specified slot in the player's inventory. Returns {@code false} if it's not possible to
      * place the entire stack in the inventory.
      */
-    public static boolean addItemToPlayerInventory(PlayerInventory inventory, int slot, ItemStack stack) {
+    public static boolean addItemToPlayerInventory(Inventory inventory, int slot, ItemStack stack) {
         if (stack.isEmpty())
             return false;
 
@@ -32,7 +32,7 @@ public class PlayerInventoryExtensions {
         return stack.isEmpty();
     }
 
-    private static int addResource(PlayerInventory inventory, int slot, ItemStack stack) {
+    private static int addResource(Inventory inventory, int slot, ItemStack stack) {
         ItemStack itemstack = inventory.getItem(slot);
 
         if (!itemstack.isEmpty() && !(itemstack.sameItem(stack) && ItemStack.tagMatches(itemstack, stack))) {

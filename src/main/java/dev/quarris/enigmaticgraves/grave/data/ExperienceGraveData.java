@@ -1,9 +1,9 @@
 package dev.quarris.enigmaticgraves.grave.data;
 
 import dev.quarris.enigmaticgraves.utils.ModRef;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 
 public class ExperienceGraveData implements IGraveData {
 
@@ -15,23 +15,23 @@ public class ExperienceGraveData implements IGraveData {
         this.xp = xp;
     }
 
-    public ExperienceGraveData(CompoundNBT nbt) {
+    public ExperienceGraveData(CompoundTag nbt) {
         this.deserializeNBT(nbt);
     }
 
     @Override
-    public void restore(PlayerEntity player) {
+    public void restore(Player player) {
         player.giveExperiencePoints(this.xp);
     }
 
     @Override
-    public CompoundNBT write(CompoundNBT nbt) {
+    public CompoundTag write(CompoundTag nbt) {
         nbt.putInt("XP", this.xp);
         return nbt;
     }
 
     @Override
-    public void read(CompoundNBT nbt) {
+    public void read(CompoundTag nbt) {
         this.xp = nbt.getInt("XP");
     }
 

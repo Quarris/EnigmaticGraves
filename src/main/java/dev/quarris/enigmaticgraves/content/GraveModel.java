@@ -1,17 +1,18 @@
 package dev.quarris.enigmaticgraves.content;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-import net.minecraft.client.renderer.entity.model.EntityModel;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.entity.Entity;
 
 public class GraveModel extends EntityModel<Entity> {
-    private final ModelRenderer pot;
-    private final ModelRenderer sapling_r1;
-    private final ModelRenderer sapling_r2;
-    private final ModelRenderer grave;
+    private final ModelPart pot;
+    private final ModelPart sapling_r1;
+    private final ModelPart sapling_r2;
+    private final ModelPart grave;
 
     public GraveModel() {
         this.texWidth = 64;
@@ -55,7 +56,7 @@ public class GraveModel extends EntityModel<Entity> {
     }
 
     @Override
-    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+    public void renderToBuffer(PoseStack matrixStack, VertexConsumer buffer, int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         matrixStack.pushPose();
         matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
         matrixStack.translate(0, -1.5, 0);
@@ -64,7 +65,7 @@ public class GraveModel extends EntityModel<Entity> {
         matrixStack.popPose();
     }
 
-    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+    public void setRotationAngle(ModelPart modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;
