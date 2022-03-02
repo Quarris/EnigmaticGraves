@@ -13,6 +13,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -33,7 +34,10 @@ public class CommonEvents {
     // Start collecting dropped items from mods at the start of the player death event.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerDeathFirst(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof PlayerEntity) || event.getEntity().level.isClientSide)
+        if (!(event.getEntity() instanceof PlayerEntity) ||
+            event.getEntity().level.isClientSide ||
+            event.getEntity().level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)
+        )
             return;
 
         GraveManager.droppedItems = new ArrayList<>();
