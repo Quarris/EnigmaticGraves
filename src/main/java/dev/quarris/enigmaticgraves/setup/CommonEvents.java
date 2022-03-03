@@ -5,15 +5,12 @@ import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.PlayerGraveEntry;
 import dev.quarris.enigmaticgraves.utils.ModRef;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.Player;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NBTUtil;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -31,8 +28,9 @@ public class CommonEvents {
     // Start collecting dropped items from mods at the start of the player death event.
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onPlayerDeathFirst(LivingDeathEvent event) {
-        if (!(event.getEntity() instanceof Player) || event.getEntity().level.isClientSide)
-            return;
+        if (!(event.getEntity() instanceof Player) ||
+            event.getEntity().level.isClientSide ||
+            event.getEntity().level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY)) return;
 
         GraveManager.droppedItems = new ArrayList<>();
     }

@@ -2,6 +2,7 @@ package dev.quarris.enigmaticgraves.setup;
 
 import dev.quarris.enigmaticgraves.compat.CompatManager;
 import dev.quarris.enigmaticgraves.content.GraveEntityRenderer;
+import dev.quarris.enigmaticgraves.content.GraveModel;
 import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.client.event.EntityRenderersEvent;
@@ -23,7 +24,7 @@ public class Setup {
 
     @SubscribeEvent
     public static void registerGraveModelLayers(EntityRenderersEvent.RegisterLayerDefinitions event) {
-
+        event.registerLayerDefinition(GraveEntityRenderer.MODEL_RES, GraveModel::createBodyLayer);
     }
 
     @SubscribeEvent

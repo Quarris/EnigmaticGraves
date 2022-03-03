@@ -3,6 +3,7 @@ package dev.quarris.enigmaticgraves.content;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 import dev.quarris.enigmaticgraves.utils.ModRef;
+import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -15,11 +16,13 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
 
-    private final GraveModel model = new GraveModel();
+    private final GraveModel model;
+    public static final ModelLayerLocation MODEL_RES = new ModelLayerLocation(ModRef.res("grave"), "main");
     private static final ResourceLocation TEX = ModRef.res("textures/grave.png");
 
     public GraveEntityRenderer(EntityRendererProvider.Context ctx) {
         super(ctx);
+        this.model = new GraveModel(ctx.bakeLayer(MODEL_RES));
     }
 
     @Override
@@ -38,7 +41,6 @@ public class GraveEntityRenderer extends EntityRenderer<GraveEntity> {
         float nameWidth = font.getStringWidth(name);
         float nameHeight = font.FONT_HEIGHT;
         font.drawString(matrixStackIn, name, -nameWidth / 2, -nameHeight / 2, 0xffffff);
-
          */
 
         matrixStackIn.popPose();
