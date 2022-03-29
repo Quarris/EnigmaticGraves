@@ -56,6 +56,7 @@ public class GraveEntity extends Entity {
         grave.setRot(player.xRot, 0);
         grave.setPos(spawnPos.getX() + player.getBbWidth() / 2, spawnPos.getY(), spawnPos.getZ() + player.getBbWidth() / 2);
         grave.setContents(graveData);
+        ModRef.LOGGER.debug("Creating Grave Entity");
         return grave;
     }
 

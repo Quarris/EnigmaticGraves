@@ -66,7 +66,7 @@ public class GraveManager {
 
     public static void prepPlayerGrave(PlayerEntity player) {
         if (!shouldSpawnGrave(player)) {
-            ModRef.LOGGER.info("Cannot spawn grave. Player is spectator is the KEEP_INVENTORY gamerule is enabled");
+            ModRef.LOGGER.info("Cannot spawn grave. Player is spectator or the KEEP_INVENTORY gamerule is enabled");
             return;
         }
 

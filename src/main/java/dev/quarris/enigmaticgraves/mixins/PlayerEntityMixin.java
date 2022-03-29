@@ -3,6 +3,7 @@ package dev.quarris.enigmaticgraves.mixins;
 import dev.quarris.enigmaticgraves.compat.CompatManager;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
+import dev.quarris.enigmaticgraves.utils.ModRef;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -11,9 +12,12 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -28,11 +32,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     protected void dropAllDeathLoot(DamageSource damageSourceIn) {
+        ModRef.LOGGER.debug("\"Dropping\" Player Loot");
         Entity entity = damageSourceIn.getEntity();
         PlayerEntity thisPlayer = (PlayerEntity) this.getEntity();
 
-        int i = net.minecraftforge.common.ForgeHooks.getLootingLevel(this, entity, damageSourceIn);
-        this.captureDrops(new java.util.ArrayList<>());
+        int i = ForgeHooks.getLootingLevel(this, entity, damageSourceIn);
+        this.captureDrops(new ArrayList<>());
 
         boolean flag = this.lastHurt > 0;
         if (!this.isBaby() && this.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
@@ -47,8 +52,10 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         Collection<ItemEntity> drops = captureDrops(null);
         CompatManager.cacheModdedHandlers(thisPlayer);
-        if (!net.minecraftforge.common.ForgeHooks.onLivingDrops(this, damageSourceIn, drops, i, this.lastHurt > 0)) {
+        if (!ForgeHooks.onLivingDrops(this, damageSourceIn, drops, i, this.lastHurt > 0)) {
             GraveManager.populatePlayerGrave(thisPlayer, drops.stream().map(ItemEntity::getItem).collect(Collectors.toList()));
+        } else {
+            ModRef.LOGGER.debug("Living Drops has been cancelled, grave will not populate.");
         }
         GraveManager.spawnPlayerGrave((PlayerEntity) this.getEntity());
     }

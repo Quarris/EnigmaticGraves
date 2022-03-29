@@ -40,6 +40,7 @@ public class CommonEvents {
         )
             return;
 
+        ModRef.LOGGER.debug("Player has died; Caching dropped items.");
         GraveManager.droppedItems = new ArrayList<>();
     }
 
@@ -50,6 +51,7 @@ public class CommonEvents {
             return;
 
         if (event.isCanceled()) {
+            ModRef.LOGGER.debug("Death was cancelled; Removing item cache.");
             GraveManager.droppedItems = null;
             return;
         }
@@ -66,6 +68,7 @@ public class CommonEvents {
         if (!GraveConfigs.COMMON.spawnGraveFinder.get())
             return;
 
+        ModRef.LOGGER.debug("Spawning Grave Finder for " + event.getPlayer().getName().getString());
         ItemStack graveFinder = new ItemStack(Registry.GRAVE_FINDER_ITEM.get());
         LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(event.getPlayer().level).getGraveEntriesForPlayer(event.getPlayer().getUUID());
 
@@ -82,7 +85,9 @@ public class CommonEvents {
     @SubscribeEvent
     public static void addDroppedItems(EntityJoinWorldEvent event) {
         if (GraveManager.droppedItems != null && event.getEntity() instanceof ItemEntity) {
-            GraveManager.droppedItems.add(((ItemEntity) event.getEntity()).getItem());
+            ItemStack item = ((ItemEntity) event.getEntity()).getItem();
+            ModRef.LOGGER.debug("Caching item '" + item + "'");
+            GraveManager.droppedItems.add(item);
             event.setCanceled(true);
         }
     }
