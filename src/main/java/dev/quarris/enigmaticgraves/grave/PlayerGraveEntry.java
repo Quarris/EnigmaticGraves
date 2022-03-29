@@ -8,7 +8,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
 
 import java.util.ArrayList;
@@ -62,7 +61,7 @@ public class PlayerGraveEntry implements INBTSerializable<CompoundTag> {
         this.graveUUID = nbt.getUUID("Grave");
         this.gravePos = NbtUtils.readBlockPos(nbt.getCompound("Pos"));
         this.timestamp = new Date(nbt.getLong("Timestamp"));
-        ListTag dataNBT = nbt.getList("Data", Constants.NBT.TAG_COMPOUND);
+        ListTag dataNBT = nbt.getList("Data", Tag.TAG_COMPOUND);
         for (Tag inbt : dataNBT) {
             CompoundTag graveNBT = (CompoundTag) inbt;
             ResourceLocation name = new ResourceLocation(graveNBT.getString("Name"));

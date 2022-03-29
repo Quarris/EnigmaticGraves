@@ -22,15 +22,15 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.17-1.7.4'
+version = '1.18.1-1.7.4'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(16) // Mojang ships Java 8 to end users, so your mod should target Java 8.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.17.1'
+    mappings channel: 'official', version: '1.18.1'
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -95,36 +95,40 @@ repositories {
     }
 
     maven { // TOP
-        name 'tterrag maven'
         url "https://maven.k-4u.nl"
     }
     maven { url "https://maven.tehnut.info" } // HWYLA
+
+    maven {
+        // location of the maven that hosts JEI files
+        name = "Progwml6 maven"
+        url = "https://dvs1.progwml6.com/files/maven/"
+    }
 }
 
 dependencies {
     if (System.getProperty("idea.sync.active") != "true") {
         annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     }
-    minecraft 'net.minecraftforge:forge:1.17.1-37.0.34'
-    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.2.7")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.2.7:api")
-    compileOnly "mcjty.theoneprobe:theoneprobe:1.17-4.0.2-3:api"
-    implementation "mcjty.theoneprobe:theoneprobe:1.17-4.0.2-3"
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 
-    //compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
-    compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3595627'
+    // Mod Dependencies
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}:api")
+    compileOnly "curse.maven:cosmetic-armor-reworked-237307:${cosmetic_armor_api}"
+    implementation fg.deobf("curse.maven:the-one-probe-245211:${top_mod}")
 
     // Testing Dependencies
-    //runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')
-    //runtimeOnly fg.deobf('curse.maven:ensorcellation-349447:3246996')
-    implementation fg.deobf("be.florens:expandability-forge:4.0.2")
-    runtimeOnly fg.deobf('curse.maven:artifacts-312353:3578539')
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.17.1-5.0.2.7")
-    runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3595626')
-    //runtimeOnly fg.deobf('curse.maven:relics-445274:3507284')
-    runtimeOnly fg.deobf('curse.maven:travelers-backpack-321117:3596420')
+    implementation fg.deobf("be.florens:expandability-forge:${expandability_version}")
+    runtimeOnly fg.deobf("curse.maven:artifacts-312353:${artifacts_mod}")
+    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}")
+    runtimeOnly fg.deobf("curse.maven:cosmetic-armor-reworked-237307:${cosmetic_armor_mod}")
+    runtimeOnly fg.deobf("curse.maven:relics-445274:${relics_mod}")
+    runtimeOnly fg.deobf("curse.maven:travelers-backpack-321117:${travelers_backpack_mod}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
     //runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
     //runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
+    //runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')
+    //runtimeOnly fg.deobf('curse.maven:ensorcellation-349447:3246996')
 }
 
 jar {

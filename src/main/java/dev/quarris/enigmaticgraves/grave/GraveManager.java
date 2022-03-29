@@ -124,7 +124,7 @@ public class GraveManager {
             dataList.add(xpData);
         }
 
-        if (CompatManager.isCuriosLoaded()) {
+        if (false && CompatManager.isCuriosLoaded()) {
             IGraveData curiosData = CurioCompat.generateCurioGraveData(player, drops);
             if (curiosData != null) {
                 dataList.add(curiosData);

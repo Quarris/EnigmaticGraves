@@ -25,8 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fmllegacy.network.NetworkHooks;
+import net.minecraftforge.network.NetworkHooks;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
@@ -114,7 +113,7 @@ public class GraveEntity extends Entity {
         if (player.isCreative()) {
             ItemStack heldItem = player.getItemInHand(hand);
             if (heldItem.getItem() == Registry.GRAVE_FINDER_ITEM.get() && !heldItem.hasTag()) {
-                this.remove();
+                this.remove(RemovalReason.DISCARDED);
                 return InteractionResult.sidedSuccess(this.level.isClientSide);
             }
         }
@@ -147,7 +146,7 @@ public class GraveEntity extends Entity {
         }
         GraveManager.setGraveRestored(this.getOwnerUUID(), this);
         this.restored = true;
-        this.remove();
+        this.remove(RemovalReason.DISCARDED);
     }
 
     @Override
@@ -184,7 +183,7 @@ public class GraveEntity extends Entity {
         CompoundTag graveNBT = compound.getCompound("Grave");
 
         List<IGraveData> dataList = new ArrayList<>();
-        ListTag contentNBT = graveNBT.getList("Content", Constants.NBT.TAG_COMPOUND);
+        ListTag contentNBT = graveNBT.getList("Content", Tag.TAG_COMPOUND);
         for (Tag inbt : contentNBT) {
             CompoundTag dataNBT = (CompoundTag) inbt;
             ResourceLocation name = new ResourceLocation(dataNBT.getString("Name"));

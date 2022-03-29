@@ -8,7 +8,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.common.util.Constants;
 
 import java.util.*;
 
@@ -89,11 +88,11 @@ public class WorldGraveData extends SavedData {
     public void loadInternal(CompoundTag nbt) {
         this.playerGraveEntries.clear();
         this.restoredGraves.clear();
-        ListTag playerGraveEntriesNBT = nbt.getList("PlayerGraveEntries", Constants.NBT.TAG_COMPOUND);
+        ListTag playerGraveEntriesNBT = nbt.getList("PlayerGraveEntries", Tag.TAG_COMPOUND);
         for (Tag inbt : playerGraveEntriesNBT) {
             CompoundTag playerGravesNBT = (CompoundTag) inbt;
             UUID uuid = playerGravesNBT.getUUID("UUID");
-            ListTag entriesNBT = playerGravesNBT.getList("Entries", Constants.NBT.TAG_COMPOUND);
+            ListTag entriesNBT = playerGravesNBT.getList("Entries", Tag.TAG_COMPOUND);
             LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(uuid, k -> new LinkedList<>());
             for (int i = 0; i < entriesNBT.size(); i++) {
                 CompoundTag entryNBT = entriesNBT.getCompound(i);
@@ -101,7 +100,7 @@ public class WorldGraveData extends SavedData {
                 entries.addLast(entry);
             }
         }
-        ListTag restoredGravesNBT = nbt.getList("RestoredGraves", Constants.NBT.TAG_COMPOUND);
+        ListTag restoredGravesNBT = nbt.getList("RestoredGraves", Tag.TAG_COMPOUND);
         for (Tag uuidNBT : restoredGravesNBT) {
             UUID restoredGraveUUID = NbtUtils.loadUUID(uuidNBT);
             this.restoredGraves.add(restoredGraveUUID);

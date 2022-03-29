@@ -20,8 +20,8 @@ public class GraveModel extends EntityModel<Entity> {
 
     public GraveModel(ModelPart model) {
         this.pot = model.getChild("pot");
-        this.sapling_r1 = model.getChild("sapling_r1");
-        this.sapling_r2 = model.getChild("sapling_r2");
+        this.sapling_r1 = this.pot.getChild("sapling_r1");
+        this.sapling_r2 = this.pot.getChild("sapling_r2");
         this.grave = model.getChild("grave");
     }
 

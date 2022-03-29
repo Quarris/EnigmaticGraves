@@ -10,7 +10,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.LazyOptional;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
@@ -152,7 +151,7 @@ public class CurioGraveData implements IGraveData {
 
     @Override
     public void read(CompoundTag nbt) {
-        ListTag stacksNBT = nbt.getList("Stacks", Constants.NBT.TAG_COMPOUND);
+        ListTag stacksNBT = nbt.getList("Stacks", Tag.TAG_COMPOUND);
         for (Tag inbt : stacksNBT) {
             CompoundTag entryNBT = (CompoundTag) inbt;
             String id = entryNBT.getString("ID");
@@ -161,7 +160,7 @@ public class CurioGraveData implements IGraveData {
             this.curioStacks.put(id, stacks);
         }
 
-        ListTag cosmeticStacksNBT = nbt.getList("CosmeticStacks", Constants.NBT.TAG_COMPOUND);
+        ListTag cosmeticStacksNBT = nbt.getList("CosmeticStacks", Tag.TAG_COMPOUND);
         for (Tag inbt : cosmeticStacksNBT) {
             CompoundTag entryNBT = (CompoundTag) inbt;
             String id = entryNBT.getString("ID");

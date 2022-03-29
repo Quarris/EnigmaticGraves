@@ -5,13 +5,13 @@ import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraftforge.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -105,7 +105,7 @@ public class PlayerInventoryGraveData implements IGraveData {
 
     @Override
     public void read(CompoundTag nbt) {
-        this.data = nbt.getList("Data", Constants.NBT.TAG_COMPOUND);
+        this.data = nbt.getList("Data", Tag.TAG_COMPOUND);
         if (nbt.contains("Remaining")) {
             int size = nbt.getInt("RemainingSize");
             NonNullList<ItemStack> items = NonNullList.withSize(size, ItemStack.EMPTY);

@@ -1,3 +1,4 @@
+
 package dev.quarris.enigmaticgraves.compat;
 
 
