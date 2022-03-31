@@ -23,8 +23,13 @@ public class PlayerInventoryExtensions {
         if (stack.isEmpty())
             return false;
 
+        // Try to find an empty slot in the inventory
         if (slot == -1) {
             slot = inventory.getFreeSlot();
+            // If no empty slots exists, then it was not inserted
+            if (slot == -1) {
+                return false;
+            }
         }
         int leftOver = addResource(inventory, slot, stack);
         stack.setCount(leftOver);
