@@ -124,7 +124,7 @@ public class GraveManager {
             dataList.add(xpData);
         }
 
-        if (false && CompatManager.isCuriosLoaded()) {
+        if (CompatManager.isCuriosLoaded()) {
             IGraveData curiosData = CurioCompat.generateCurioGraveData(player, drops);
             if (curiosData != null) {
                 dataList.add(curiosData);
@@ -163,7 +163,7 @@ public class GraveManager {
         GraveConfigs.Common configs = GraveConfigs.COMMON;
         // First, try to find the first non-air block below the death point
         // and return the air block above that.
-        for (BlockPos.MutableBlockPos pos = new BlockPos(deathPos.x, Math.round(deathPos.y), deathPos.z).mutable(); pos.getY() > 0; pos = pos.move(Direction.DOWN)) {
+        for (BlockPos.MutableBlockPos pos = new BlockPos(deathPos.x, Math.round(deathPos.y), deathPos.z).mutable(); pos.getY() > world.getMinBuildHeight(); pos = pos.move(Direction.DOWN)) {
             BlockPos belowPos = new BlockPos(pos).below();
             BlockState belowState = world.getBlockState(belowPos);
             if (blocksMovement(belowState)) {
@@ -206,7 +206,7 @@ public class GraveManager {
         }
 
         // If no position was selected, drop the grave at the bottom
-        outPos.set(deathPos.x, 1, deathPos.z);
+        outPos.set(deathPos.x, world.getMinBuildHeight() + 1, deathPos.z);
         return !world.getBlockState(new BlockPos(deathPos.x, 0, deathPos.z)).getMaterial().blocksMotion();
     }
 

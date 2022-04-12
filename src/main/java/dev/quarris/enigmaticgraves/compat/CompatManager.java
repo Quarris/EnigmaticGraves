@@ -36,9 +36,11 @@ public class CompatManager {
     public static void cacheModdedHandlers(Player player) {
         ModRef.LOGGER.debug("Caching modded handlers for " + player.getName().getString());
         if (CompatManager.isCuriosLoaded()) {
-            //CurioCompat.cacheCurios(player);
+            ModRef.LOGGER.debug("Caching Curios");
+            CurioCompat.cacheCurios(player);
         }
         if(CompatManager.isCosmeticArmorReworkedLoaded()){
+            ModRef.LOGGER.debug("Caching CosmeticArmor");
             CosmeticArmorReworkedCompat.cacheCosmeticArmorReworkeds(player);
         }
     }
