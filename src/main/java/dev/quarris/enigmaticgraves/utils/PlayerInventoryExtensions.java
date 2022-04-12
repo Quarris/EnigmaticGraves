@@ -16,18 +16,29 @@ public class PlayerInventoryExtensions {
     }
 
     /**
-     * Adds the stack to the specified slot in the player's inventory. Returns {@code false} if it's not possible to
-     * place the entire stack in the inventory.
+     * Attempts to add item into the inventory, any overflows.
+     * First if tries to add the stack to the specified slot in the player's inventory.
+     * If that fails to fully insert, it will search for any available slot.
+     * Returns {@code false} if it's not possible to place the entire stack in the inventory.
      */
     public static boolean addItemToPlayerInventory(Inventory inventory, int slot, ItemStack stack) {
         if (stack.isEmpty())
             return false;
 
+        // Try to find an empty slot in the inventory
         if (slot == -1) {
             slot = inventory.getFreeSlot();
+            // If no empty slots exists, then it was not inserted
+            if (slot == -1) {
+                return false;
+            }
         }
         int leftOver = addResource(inventory, slot, stack);
         stack.setCount(leftOver);
+
+        if (leftOver > 0) {
+            addItemToPlayerInventory(inventory, -1, stack);
+        }
 
         return stack.isEmpty();
     }

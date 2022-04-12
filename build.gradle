@@ -30,7 +30,7 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17) // Mojang ships Java
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.18.1'
+    mappings channel: 'official', version: "${mc_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     runs {
         client {
@@ -113,14 +113,13 @@ dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 
     // Mod Dependencies
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}:api")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}")
     compileOnly "curse.maven:cosmetic-armor-reworked-237307:${cosmetic_armor_api}"
     implementation fg.deobf("curse.maven:the-one-probe-245211:${top_mod}")
 
     // Testing Dependencies
     implementation fg.deobf("be.florens:expandability-forge:${expandability_version}")
     runtimeOnly fg.deobf("curse.maven:artifacts-312353:${artifacts_mod}")
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}")
     runtimeOnly fg.deobf("curse.maven:cosmetic-armor-reworked-237307:${cosmetic_armor_mod}")
     runtimeOnly fg.deobf("curse.maven:relics-445274:${relics_mod}")
     runtimeOnly fg.deobf("curse.maven:travelers-backpack-321117:${travelers_backpack_mod}")
