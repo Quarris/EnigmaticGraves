@@ -22,7 +22,7 @@ mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = '1.18.1-1.7.4'
+version = "${mc_version}-1.7.4"
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -97,7 +97,7 @@ repositories {
     maven { // TOP
         url "https://maven.k-4u.nl"
     }
-    maven { url "https://maven.tehnut.info" } // HWYLA
+    //maven { url "https://maven.tehnut.info" } // HWYLA
 
     maven {
         // location of the maven that hosts JEI files
