@@ -54,7 +54,7 @@ public class GraveModel extends EntityModel<Entity> {
 
     @Override
     public void setupAnim(Entity entityIn, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-        Minecraft.getInstance().getItemRenderer().renderStatic();
+
     }
 
     @Override
