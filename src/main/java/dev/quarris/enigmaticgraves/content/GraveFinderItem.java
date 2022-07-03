@@ -31,14 +31,14 @@ public class GraveFinderItem extends Item {
 
         CompoundTag nbt = stack.getTag();
         if (nbt == null) {
-            tooltip.add(new TranslatableComponent("info.grave.remove_grave"));
+            tooltip.add(Component.translatable("info.grave.remove_grave"));
             return;
         }
         if (nbt.contains("Pos")) {
             BlockPos bp = NbtUtils.readBlockPos(nbt.getCompound("Pos"));
-            tooltip.add(new TextComponent("X: " + bp.getX() + ", Y: " + bp.getY() + ", Z: " + bp.getZ()));
+            tooltip.add(Component.literal("X: " + bp.getX() + ", Y: " + bp.getY() + ", Z: " + bp.getZ()));
         } else {
-            tooltip.add(new TranslatableComponent("info.grave.not_found"));
+            tooltip.add(Component.translatable("info.grave.not_found"));
         }
     }
 
@@ -56,11 +56,11 @@ public class GraveFinderItem extends Item {
         player.startUsingItem(hand);
         if (level instanceof ServerLevel) {
             BlockPos pos = NbtUtils.readBlockPos(stack.getTag().getCompound("Pos"));
-            Component result = ComponentUtils.wrapInSquareBrackets(new TranslatableComponent("chat.coordinates", pos.getX(), pos.getY(), pos.getZ()))
+            Component result = ComponentUtils.wrapInSquareBrackets(Component.translatable("chat.coordinates", pos.getX(), pos.getY(), pos.getZ()))
                 .withStyle((style) -> style.withColor(ChatFormatting.GREEN)
                     .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/tp @s " + pos.getX() + " " + pos.getY() + " " + pos.getZ()))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TranslatableComponent("chat.coordinates.tooltip"))));
-            player.sendMessage(new TranslatableComponent("grave.locate", result), player.getUUID());
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.translatable("chat.coordinates.tooltip"))));
+            player.displayClientMessage(Component.translatable("grave.locate", result), false);
             player.swing(hand, true);
 
             return InteractionResultHolder.success(stack);

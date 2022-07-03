@@ -14,7 +14,7 @@ import net.minecraft.client.multiplayer.ClientSuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.LinkedList;
@@ -39,13 +39,13 @@ public class GraveEntryType implements ArgumentType<Integer> {
         String input = reader.readString();
         Matcher matcher = PATTERN.matcher(input);
         if (!matcher.matches() || matcher.groupCount() <= 0) {
-            Message msg = new TextComponent("Input does not match pattern 'death_<id>...'");
+            Message msg = Component.literal("Input does not match pattern 'death_<id>...'");
             throw new CommandSyntaxException(new SimpleCommandExceptionType(msg), msg);
         }
         try {
             return Integer.parseInt(matcher.group(1));
         } catch (NumberFormatException e) {
-            Message msg = new TextComponent("Invalid death id");
+            Message msg = Component.literal("Invalid death id");
             throw new CommandSyntaxException(CommandSyntaxException.BUILT_IN_EXCEPTIONS.readerInvalidInt(), msg, input, matcher.start(1));
         }
     }

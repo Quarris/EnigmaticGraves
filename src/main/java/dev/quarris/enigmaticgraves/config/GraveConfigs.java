@@ -71,7 +71,7 @@ public class GraveConfigs {
             ).defineInRange("scanRange", 10, 0, 255);
             this.graveFloorBlock = builder.comment(
                     "The block that should spawn below the grave if there is none"
-            ).define("floorBlock", Blocks.DIRT.getRegistryName().toString(), obj -> {
+            ).define("floorBlock", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT).toString(), obj -> {
                 if (!(obj instanceof String))
                     return false;
                 return ForgeRegistries.BLOCKS.containsKey(new ResourceLocation(obj.toString()));

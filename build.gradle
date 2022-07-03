@@ -1,34 +1,36 @@
 buildscript {
     repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
         maven {
             name "Sponge"
             url "https://repo.spongepowered.org/repository/maven-public/"
             content { includeGroup "org.spongepowered" }
         }
-        mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
-apply plugin: 'net.minecraftforge.gradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+plugins {
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+}
+
 apply plugin: 'org.spongepowered.mixin'
+
 mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
 }
 
-version = "${mc_version}-1.7.4"
+version = "${mc_version}-${mod_version}"
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+
 minecraft {
     mappings channel: 'official', version: "${mc_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -49,6 +51,21 @@ minecraft {
 
         server {
             workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+
+            mods {
+                enigmaticgraves {
+                    source sourceSets.main
+                }
+            }
+        }
+
+        gameTestServer {
+            workingDirectory project.file('run')
+
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'mixin.env.remapRefMap', 'true'
@@ -116,14 +133,19 @@ dependencies {
     implementation fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}")
     compileOnly "curse.maven:cosmetic-armor-reworked-237307:${cosmetic_armor_api}"
     implementation fg.deobf("curse.maven:the-one-probe-245211:${top_mod}")
+    implementation fg.deobf("curse.maven:jade-324717:${jade_mod}")
 
     // Testing Dependencies
-    implementation fg.deobf("be.florens:expandability-forge:${expandability_version}")
-    runtimeOnly fg.deobf("curse.maven:artifacts-312353:${artifacts_mod}")
+    //implementation fg.deobf("be.florens:expandability-forge:${expandability_version}")
+    //runtimeOnly fg.deobf("curse.maven:artifacts-312353:${artifacts_mod}")
     runtimeOnly fg.deobf("curse.maven:cosmetic-armor-reworked-237307:${cosmetic_armor_mod}")
-    runtimeOnly fg.deobf("curse.maven:relics-445274:${relics_mod}")
+    //runtimeOnly fg.deobf("curse.maven:relics-445274:${relics_mod}")
     runtimeOnly fg.deobf("curse.maven:travelers-backpack-321117:${travelers_backpack_mod}")
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
+
+    runtimeOnly fg.deobf("curse.maven:scalalib-320926:${scala_lib_mod}")
+    runtimeOnly fg.deobf("curse.maven:bdlib-70496:${bdlib_mod}")
+    runtimeOnly fg.deobf("curse.maven:technobauble-492052:${technobauble_mod}")
     //runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
     //runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
     //runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')

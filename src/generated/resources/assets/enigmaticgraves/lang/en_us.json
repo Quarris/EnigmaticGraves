@@ -1,4 +1,5 @@
 {
+  "config.jade.plugin_enigmaticgraves.grave": "Enigmatic Graves Plugin",
   "enigmaticgraves.grave.not_found": "No bound grave",
   "entity.enigmaticgraves.grave": "Grave",
   "grave.locate": "The grave is at %s",

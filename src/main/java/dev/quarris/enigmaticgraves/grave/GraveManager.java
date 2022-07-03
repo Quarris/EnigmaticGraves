@@ -109,8 +109,7 @@ public class GraveManager {
         if (xpHandling != ExperienceHandling.DROP) {
             int xp = 0; // if (xpHandling == ExperienceHandling.REMOVE)
             if (xpHandling == ExperienceHandling.KEEP_VANILLA) {
-                // The 'player' param is not used for Player, using ourselves to prevent random NPE crashes from possible mixins
-                xp = player.getExperienceReward(player);
+                xp = player.getExperienceReward();
                 xp = net.minecraftforge.event.ForgeEventFactory.getExperienceDrop(player, player, xp);
             } else if (xpHandling == ExperienceHandling.KEEP_ALL) {
                 xp += player.experienceProgress * player.getXpNeededForNextLevel();
