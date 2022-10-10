@@ -12,7 +12,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -46,7 +46,7 @@ public class CommonEvents {
             return;
         }
 
-        Player player = (Player) event.getEntityLiving();
+        Player player = (Player) event.getEntity();
         GraveManager.prepPlayerGrave(player);
     }
 
@@ -59,7 +59,7 @@ public class CommonEvents {
             return;
 
         ItemStack graveFinder = new ItemStack(Registry.GRAVE_FINDER_ITEM.get());
-        LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(event.getPlayer().level).getGraveEntriesForPlayer(event.getPlayer().getUUID());
+        LinkedList<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(event.getEntity().level).getGraveEntriesForPlayer(event.getEntity().getUUID());
 
         if (entries == null || entries.isEmpty())
             return;
@@ -68,11 +68,11 @@ public class CommonEvents {
         CompoundTag nbt = graveFinder.getOrCreateTag();
         nbt.put("Pos", NbtUtils.writeBlockPos(latestEntry.gravePos));
         nbt.putUUID("GraveUUID", latestEntry.graveUUID);
-        event.getPlayer().addItem(graveFinder);
+        event.getEntity().addItem(graveFinder);
     }
 
     @SubscribeEvent
-    public static void addDroppedItems(EntityJoinWorldEvent event) {
+    public static void addDroppedItems(EntityJoinLevelEvent event) {
         if (GraveManager.droppedItems != null && event.getEntity() instanceof ItemEntity) {
             GraveManager.droppedItems.add(((ItemEntity) event.getEntity()).getItem());
             event.setCanceled(true);

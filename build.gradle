@@ -143,9 +143,10 @@ dependencies {
     runtimeOnly fg.deobf("curse.maven:travelers-backpack-321117:${travelers_backpack_mod}")
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}-forge:${jei_version}")
 
-    runtimeOnly fg.deobf("curse.maven:scalalib-320926:${scala_lib_mod}")
-    runtimeOnly fg.deobf("curse.maven:bdlib-70496:${bdlib_mod}")
-    runtimeOnly fg.deobf("curse.maven:technobauble-492052:${technobauble_mod}")
+    //runtimeOnly fg.deobf("curse.maven:scalalib-320926:${scala_lib_mod}")
+    //runtimeOnly fg.deobf("curse.maven:bdlib-70496:${bdlib_mod}")
+    //runtimeOnly fg.deobf("curse.maven:technobauble-492052:${technobauble_mod}")
+
     //runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
     //runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
     //runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')

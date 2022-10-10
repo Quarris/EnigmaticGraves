@@ -65,10 +65,10 @@ public class GraveConfigs {
             ).push("position");
             this.scanHeight = builder.comment(
                     "The scanning start position for a valid place to spawn"
-            ).defineInRange("scanHeight", 60, 0, 255);
+            ).defineInRange("scanHeight", 60, -64, 319);
             this.scanRange = builder.comment(
                     "The vertical range (up/down) from the initial position to scan for a valid spot to place a grave"
-            ).defineInRange("scanRange", 10, 0, 255);
+            ).defineInRange("scanRange", 10, -64, 319);
             this.graveFloorBlock = builder.comment(
                     "The block that should spawn below the grave if there is none"
             ).define("floorBlock", ForgeRegistries.BLOCKS.getKey(Blocks.DIRT).toString(), obj -> {
