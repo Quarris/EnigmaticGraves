@@ -19,10 +19,6 @@ plugins {
 
 apply plugin: 'org.spongepowered.mixin'
 
-mixin {
-    add sourceSets.main, "enigmaticgraves.refmap.json"
-}
-
 version = "${mc_version}-${mod_version}"
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
@@ -30,6 +26,11 @@ archivesBaseName = 'EnigmaticGraves'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+
+mixin {
+    add sourceSets.main, "enigmaticgraves.refmap.json"
+    config "enigmaticgraves.mixins.json"
+}
 
 minecraft {
     mappings channel: 'official', version: "${mc_version}"
@@ -162,8 +163,7 @@ jar {
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : "${version}",
                 "Implementation-Vendor"   : "quarris",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConnector"          : "dev.quarris.enigmaticgraves.MixinConnector"
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }

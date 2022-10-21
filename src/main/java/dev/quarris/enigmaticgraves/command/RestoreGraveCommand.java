@@ -78,7 +78,7 @@ public class RestoreGraveCommand {
                                         .executes(ctx -> restoreGrave(ctx, false, false))
                                         .then(Commands.argument("forced", BoolArgumentType.bool())
                                                 .executes(ctx -> restoreGrave(ctx, false, BoolArgumentType.getBool(ctx, "forced"))))
-                                        .then(Commands.argument("entry", new GraveEntryType())
+                                        .then(Commands.argument("entry", new GraveEntryArgument())
                                                 .suggests(SUGGEST_ENTRIES)
                                                 .executes(ctx -> restoreGrave(ctx, true, false))
                                                 .then(Commands.argument("forced", BoolArgumentType.bool())
@@ -104,7 +104,7 @@ public class RestoreGraveCommand {
         ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
         PlayerGraveEntry entry;
         if (useArg) {
-            entry = GraveEntryType.getEntry(player.getUUID(), ctx, "entry");
+            entry = GraveEntryArgument.getEntry(player.getUUID(), ctx, "entry");
         } else {
             entry = GraveManager.getWorldGraveData(ctx.getSource().getLevel())
                     .getGraveEntriesForPlayer(player.getUUID()).getFirst();

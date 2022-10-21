@@ -1,5 +1,6 @@
 package dev.quarris.enigmaticgraves.command;
 
+import com.google.gson.JsonObject;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -11,11 +12,15 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.PlayerGraveEntry;
 import net.minecraft.client.multiplayer.ClientSuggestionProvider;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.server.command.EnumArgument;
 
 import java.util.LinkedList;
 import java.util.UUID;
@@ -23,7 +28,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GraveEntryType implements ArgumentType<Integer> {
+public class GraveEntryArgument implements ArgumentType<Integer> {
 
     private static final Pattern PATTERN = Pattern.compile("death_(\\d){1,3}.*");
 
