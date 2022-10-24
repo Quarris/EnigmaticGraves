@@ -96,7 +96,7 @@ public class GraveEntity extends Entity {
 
     @Override
     public void playerTouch(Player player) {
-        if (player.isShiftKeyDown()) {
+        if (GraveConfigs.COMMON.sneakRetrieval.get() && player.isShiftKeyDown()) {
             if (this.belongsTo(player)) {
                 this.restoreGrave(player);
             }
