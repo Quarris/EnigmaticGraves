@@ -1,1 +1,0 @@
-MixinConnector: dev.quarris.enigmaticgraves.MixinConnector
