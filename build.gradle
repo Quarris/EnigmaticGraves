@@ -20,9 +20,10 @@ apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 mixin {
     add sourceSets.main, "enigmaticgraves.refmap.json"
+    config "enigmaticgraves.mixins.json"
 }
 
-version = "${mc_version}-1.7.4"
+version = "${mc_version}-${mod_version}"
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -87,7 +88,7 @@ repositories {
         url = "https://maven.theillusivec4.top/"
     }
     maven {  // ExpandAbility
-        url = "https://maven.florens.be/"
+        url = "https://maven.florens.be/releases"
     }
     maven {
         name = "Cursemaven"
@@ -118,11 +119,11 @@ dependencies {
     implementation fg.deobf("curse.maven:the-one-probe-245211:${top_mod}")
 
     // Testing Dependencies
-    implementation fg.deobf("be.florens:expandability-forge:${expandability_version}")
-    runtimeOnly fg.deobf("curse.maven:artifacts-312353:${artifacts_mod}")
+    //runtimeOnly fg.deobf("be.florens:expandability-forge:${expandability_version}")
+    //runtimeOnly fg.deobf("curse.maven:artifacts-312353:${artifacts_mod}")
     runtimeOnly fg.deobf("curse.maven:cosmetic-armor-reworked-237307:${cosmetic_armor_mod}")
-    runtimeOnly fg.deobf("curse.maven:relics-445274:${relics_mod}")
-    runtimeOnly fg.deobf("curse.maven:travelers-backpack-321117:${travelers_backpack_mod}")
+    //runtimeOnly fg.deobf("curse.maven:relics-445274:${relics_mod}")
+    //runtimeOnly fg.deobf("curse.maven:travelers-backpack-321117:${travelers_backpack_mod}")
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
     //runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
     //runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
@@ -139,8 +140,7 @@ jar {
                 "Implementation-Title"    : project.name,
                 "Implementation-Version"  : "${version}",
                 "Implementation-Vendor"   : "quarris",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConnector"          : "dev.quarris.enigmaticgraves.MixinConnector"
+                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }
 }

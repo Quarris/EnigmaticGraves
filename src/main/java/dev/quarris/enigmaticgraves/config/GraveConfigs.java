@@ -23,6 +23,7 @@ public class GraveConfigs {
 
         // Misc
         public BooleanValue spawnGraveFinder;
+        public BooleanValue sneakRetrieval;
 
         // Data
         public EnumValue<ExperienceHandling> experienceGraveHandling;
@@ -38,6 +39,9 @@ public class GraveConfigs {
             this.spawnGraveFinder = builder.comment(
                 "Should you get a grave finder item after you respawn?"
             ).define("spawnGraveFinder", true);
+            this.sneakRetrieval = builder.comment(
+                "Set to false to disable retrieval by sneaking on top of the grave."
+            ).define("sneakRetrieval", true);
             builder.pop();
             builder.comment("How the grave data is handled").push("data");
             this.experienceGraveHandling = builder.comment(
