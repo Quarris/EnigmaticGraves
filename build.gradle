@@ -109,7 +109,7 @@ dependencies {
         annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
     }
     minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
-    compile fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3")
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3")
     compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3:api")
     compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
     //compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
