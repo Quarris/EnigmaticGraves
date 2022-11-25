@@ -44,8 +44,8 @@ public class WorldGraveData extends WorldSavedData {
     public void addGraveEntry(PlayerEntity player, PlayerGraveEntry entry) {
         LinkedList<PlayerGraveEntry> entries = this.playerGraveEntries.computeIfAbsent(player.getUUID(), k -> new LinkedList<>());
         if (entries.size() >= GraveConfigs.COMMON.graveEntryCount.get()) {
-            ModRef.LOGGER.debug("Entries reached max values for " + player.getName());
-            ModRef.LOGGER.debug("Removing oldest entry");
+            ModRef.LOGGER.info("Entries reached max values for " + player.getName().getString());
+            ModRef.LOGGER.info("Removing oldest entry");
             entries.removeLast();
         }
         entries.addFirst(entry);

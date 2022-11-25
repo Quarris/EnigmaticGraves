@@ -32,7 +32,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Override
     protected void dropAllDeathLoot(DamageSource damageSourceIn) {
-        ModRef.LOGGER.debug("\"Dropping\" Player Loot");
+        ModRef.LOGGER.info("\"Dropping\" Player Loot");
         Entity entity = damageSourceIn.getEntity();
         PlayerEntity thisPlayer = (PlayerEntity) this.getEntity();
 
@@ -55,7 +55,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (!ForgeHooks.onLivingDrops(this, damageSourceIn, drops, i, this.lastHurt > 0)) {
             GraveManager.populatePlayerGrave(thisPlayer, drops.stream().map(ItemEntity::getItem).collect(Collectors.toList()));
         } else {
-            ModRef.LOGGER.debug("Living Drops has been cancelled, grave will not populate.");
+            ModRef.LOGGER.info("Living Drops has been cancelled, grave will not populate.");
         }
         GraveManager.spawnPlayerGrave((PlayerEntity) this.getEntity());
     }

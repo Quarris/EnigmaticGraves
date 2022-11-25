@@ -23,7 +23,7 @@ mixin {
     config "enigmaticgraves.mixins.json"
 }
 
-version = '1.16.5-1.7.6'
+version = '1.16.5-1.7.6-logging'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 

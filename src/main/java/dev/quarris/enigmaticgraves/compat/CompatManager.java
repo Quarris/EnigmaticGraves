@@ -34,7 +34,7 @@ public class CompatManager {
 
 
     public static void cacheModdedHandlers(PlayerEntity player) {
-        ModRef.LOGGER.debug("Caching modded handlers for " + player.getName().getString());
+        ModRef.LOGGER.info("Caching modded handlers for " + player.getName().getString());
         if (CompatManager.isCuriosLoaded()) {
             CurioCompat.cacheCurios(player);
         }

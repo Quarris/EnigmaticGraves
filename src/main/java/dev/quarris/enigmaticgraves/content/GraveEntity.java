@@ -56,7 +56,7 @@ public class GraveEntity extends Entity {
         grave.setRot(player.xRot, 0);
         grave.setPos(spawnPos.getX() + player.getBbWidth() / 2, spawnPos.getY(), spawnPos.getZ() + player.getBbWidth() / 2);
         grave.setContents(graveData);
-        ModRef.LOGGER.debug("Creating Grave Entity");
+        ModRef.LOGGER.info("Creating Grave Entity");
         return grave;
     }
 
@@ -144,6 +144,7 @@ public class GraveEntity extends Entity {
         }
 
         for (IGraveData data : this.contents) {
+            ModRef.LOGGER.info("Restoring {}", data.getName());
             data.restore(player);
         }
         GraveManager.setGraveRestored(this.getOwnerUUID(), this);
@@ -152,11 +153,11 @@ public class GraveEntity extends Entity {
     }
 
     @Override
-    public void remove() {
-        super.remove();
+    public void remove(boolean keepData) {
         if (!this.level.isClientSide && !this.restored) {
             ModRef.LOGGER.warn("Grave at {} was removed without being restored!", this.blockPosition());
         }
+        super.remove(keepData);
     }
 
     private boolean belongsTo(PlayerEntity player) {

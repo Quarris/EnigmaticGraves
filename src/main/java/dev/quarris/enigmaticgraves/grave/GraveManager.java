@@ -36,7 +36,7 @@ public class GraveManager {
     public static final HashMap<ResourceLocation, Function<CompoundNBT, IGraveData>> GRAVE_DATA_SUPPLIERS = new HashMap<>();
     public static PlayerGraveEntry latestGraveEntry;
     public static List<ItemStack> droppedItems;
-    public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyyMMdd_HHmmss");
+    public static final DateFormat TIMESTAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss");
 
     public static void init() {
         GRAVE_DATA_SUPPLIERS.put(PlayerInventoryGraveData.NAME, PlayerInventoryGraveData::new);
@@ -79,7 +79,7 @@ public class GraveManager {
         if (latestGraveEntry == null)
             return;
 
-        ModRef.LOGGER.debug("Populating grave for " + player.getName().getString());
+        ModRef.LOGGER.info("Populating grave for " + player.getName().getString());
         generateGraveDataList(player, latestGraveEntry, drops);
     }
 
@@ -89,7 +89,7 @@ public class GraveManager {
 
         WorldGraveData worldData = getWorldGraveData(player.level);
         GraveEntity grave = GraveEntity.createGrave(player, latestGraveEntry.dataList);
-        ModRef.LOGGER.debug("Attempting to spawn grave for " + player.getName().getString() + " at " + grave.blockPosition());
+        ModRef.LOGGER.info("Attempting to spawn grave for " + player.getName().getString() + " at " + grave.blockPosition());
         latestGraveEntry.graveUUID = grave.getUUID();
         latestGraveEntry.gravePos = grave.blockPosition();
         if (!player.level.addFreshEntity(grave)) {
@@ -98,7 +98,7 @@ public class GraveManager {
             ModRef.LOGGER.info("Spawned grave for " + player.getName().getString() + " at " + grave.blockPosition());
         }
         worldData.addGraveEntry(player, latestGraveEntry);
-        ModRef.LOGGER.info("Added grave entry to player " + player.getName().getString());
+        ModRef.LOGGER.info("Added grave entry to player " + player.getName().getString() + " with at time " + latestGraveEntry.timestamp);
 
         latestGraveEntry = null;
         droppedItems = null;
@@ -156,6 +156,8 @@ public class GraveManager {
                 .findFirst()
                 .ifPresent(PlayerGraveEntry::setRestored);
         }
+
+        ModRef.LOGGER.info("Grave for {} restored ", grave.getOwnerName());
     }
 
     /**
