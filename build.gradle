@@ -55,7 +55,6 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            args '--username', 'Quarris', '--uuid', '314b59c7-413f-4357-a074-f059ebe5aaae', '--accessToken', new File('SECRET.txt').text // I hate microsoft
 
             mods {
                 enigmaticgraves {
