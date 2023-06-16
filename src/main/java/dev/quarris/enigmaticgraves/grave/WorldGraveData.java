@@ -14,7 +14,7 @@ import java.util.*;
 
 public class WorldGraveData extends WorldSavedData {
 
-    public static final String NAME = ModRef.res("graves").toString();
+    public static final String NAME = ModRef.ID;
 
     private final Map<UUID, LinkedList<PlayerGraveEntry>> playerGraveEntries = new HashMap<>();
     private final Set<UUID> restoredGraves = new HashSet<>();
