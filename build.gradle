@@ -23,7 +23,7 @@ mixin {
     config "enigmaticgraves.mixins.json"
 }
 
-version = '1.16.5-1.7.6-logging'
+version = '1.16.5-1.7.7'
 group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'EnigmaticGraves'
 
@@ -55,7 +55,6 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            args '--username', 'Quarris', '--uuid', '314b59c7-413f-4357-a074-f059ebe5aaae', '--accessToken', new File('SECRET.txt').text // I hate microsoft
 
             mods {
                 enigmaticgraves {
@@ -70,8 +69,6 @@ minecraft {
             property 'forge.logging.console.level', 'debug'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-
-            args '--mod', 'enigmaticgraves', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
                 enigmaticgraves {
