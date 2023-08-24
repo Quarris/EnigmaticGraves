@@ -6,75 +6,68 @@ buildscript {
             url "https://repo.spongepowered.org/repository/maven-public/"
             content { includeGroup "org.spongepowered" }
         }
+        maven {
+            name = 'Parchment MC'
+            url = 'https://maven.parchmentmc.org'
+        }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '4.1.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
+        classpath group: 'org.parchmentmc', name: 'librarian', version: '1.+'
     }
 }
+
 apply plugin: 'net.minecraftforge.gradle'
-// Only edit below this line, the above code adds and enables the necessary things for Forge to be setup.
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
-mixin {
-    add sourceSets.main, "enigmaticgraves.refmap.json"
-    config "enigmaticgraves.mixins.json"
-}
 
-version = '1.16.5-1.7.7'
-group = 'dev.quarris.enigmaticgraves' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = 'EnigmaticGraves'
+version = mod_version
+group = mod_group_id
+
+archivesBaseName = "${mod_id}-${mc_version}"
+
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8) // Mojang ships Java 8 to end users, so your mod should target Java 8.
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
 minecraft {
-    mappings channel: 'official', version: '1.16.5'
+    mappings channel: mappings_channel, version: "${mappings_version}-${mc_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
+
     runs {
-        client {
-            workingDirectory project.file('run')
+        configureEach {
+            workingDirectory project.file("run/${it.name}")
+
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
             property 'mixin.env.remapRefMap', 'true'
             property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            args '--username', 'Quarris', '--uuid', '314b59c7-413f-4357-a074-f059ebe5aaae', '--accessToken', new File('SECRET.txt').text // I hate microsoft
 
             mods {
-                enigmaticgraves {
+                "${mod_id}" {
                     source sourceSets.main
                 }
             }
+        }
+        client {
+            args '--username', 'Quarris', '--uuid', '314b59c7-413f-4357-a074-f059ebe5aaae', '--accessToken', new File('SECRET.txt').text
+            // I hate microsoft
         }
 
         server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
-            mods {
-                enigmaticgraves {
-                    source sourceSets.main
-                }
-            }
         }
 
         data {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'REGISTRIES'
-            property 'forge.logging.console.level', 'debug'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
 
-            mods {
-                enigmaticgraves {
-                    source sourceSets.main
-                }
-            }
         }
     }
 }
@@ -104,45 +97,59 @@ repositories {
 }
 
 dependencies {
-    if (System.getProperty("idea.sync.active") != "true") {
-        annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
-    }
-    minecraft 'net.minecraftforge:forge:1.16.5-36.2.39'
-    implementation fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:1.16.5-4.0.5.3:api")
-    compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22:api")
+    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    implementation fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}")
+    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${mc_version}-${curios_version}:api")
+    compileOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:${top_version}:api")
     //compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
-    compileOnly 'curse.maven:cosmetic-armor-reworked-237307:3398001'
-    compileOnly 'curse.maven:hwyla-253449:3033593'
+    compileOnly "curse.maven:cosmetic-armor-reworked-${cosmetic_armor_slug}:${cosmetic_armor_api_version}"
+    compileOnly "curse.maven:hwyla-${hwyla_slug}:${hwyla_version}"
+    implementation fg.deobf("be.florens:expandability-forge:${expandability_version}")
 
     // Testing Dependencies
-    runtimeOnly fg.deobf('curse.maven:cofh-core-69162:3249453')
-    runtimeOnly fg.deobf('curse.maven:ensorcellation-349447:3246996')
-    implementation fg.deobf("be.florens:expandability-forge:2.0.1")
-    runtimeOnly fg.deobf('curse.maven:artifacts-312353:3374317')
-    runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:1.16-3.1.4-22")
-    runtimeOnly fg.deobf('curse.maven:cosmetic-armor-reworked-237307:3398000')
-    runtimeOnly fg.deobf('curse.maven:relics-445274:3507284')
-    runtimeOnly fg.deobf('curse.maven:travelers-backpack-321117:3596417')
-    runtimeOnly fg.deobf('curse.maven:lost_trinkets-404038:3242497')
-    runtimeOnly fg.deobf('curse.maven:lollipop-347954:3232534')
+    runtimeOnly fg.deobf("mcjty.theoneprobe:TheOneProbe-1.16:${top_version}")
+    runtimeOnly fg.deobf("curse.maven:cofh-core-${cofh_core_slug}:${cofh_core_version}")
+    runtimeOnly fg.deobf("curse.maven:ensorcellation-${ensorcellation_slug}:${ensorcellation_version}")
+    runtimeOnly fg.deobf("curse.maven:artifacts-${artifacts_slug}:${artifacts_version}")
+    runtimeOnly fg.deobf("curse.maven:cosmetic-armor-reworked-${cosmetic_armor_slug}:${cosmetic_armor_version}")
+    runtimeOnly fg.deobf("curse.maven:relics-${relics_slug}:${relics_version}")
+    runtimeOnly fg.deobf("curse.maven:travelers-backpack-${travelers_backpack_slug}:${travelers_backpack_version}")
+    runtimeOnly fg.deobf("curse.maven:lost_trinkets-${lost_trinkets_slug}:${lost_trinkets_version}")
+    runtimeOnly fg.deobf("curse.maven:lollipop-${lollipop_slug}:${lollipop_version}")
+
+    annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
 }
 
-jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : "enigmaticgraves",
-                "Specification-Vendor"    : "quarris",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : "${version}",
-                "Implementation-Vendor"   : "quarris",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
-        ])
+tasks.withType(ProcessResources).configureEach {
+    var replaceProperties = [
+            mc_version          : mc_version, mc_version_range: mc_version_range,
+            forge_version       : forge_version, forge_version_range: forge_version_range,
+            loader_version_range: loader_version_range,
+            mod_id              : mod_id, mod_name: mod_name, mod_license: mod_license, mod_version: mod_version,
+            mod_authors         : mod_authors, mod_description: mod_description, pack_format_number: pack_format_number,
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/mods.toml', 'pack.mcmeta']) {
+        expand replaceProperties + [project: project]
     }
 }
 
-jar.finalizedBy('reobfJar')
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'     : mod_id,
+                'Specification-Vendor'    : mod_authors,
+                'Specification-Version'   : '1', // We are version 1 of ourselves
+                'Implementation-Title'    : project.name,
+                'Implementation-Version'  : project.jar.archiveVersion,
+                'Implementation-Vendor'   : mod_authors,
+                'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
+        ])
+    }
+
+    finalizedBy 'reobfJar'
+}
 
 publishing {
     publications {
