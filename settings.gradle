@@ -1,6 +1,21 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        maven { url = 'https://maven.minecraftforge.net/' }
+        maven {
+            name = 'MinecraftForge'
+            url = 'https://maven.minecraftforge.net/'
+        }
+        maven {
+            name = 'Parchment MC'
+            url = 'https://maven.parchmentmc.org'
+        }
+        maven {
+            name = "DumbCode GradleHook"
+            url "https://plugins.gradle.org/m2/"
+        }
+        maven {
+            name = 'SpongePowered'
+            url = 'https://repo.spongepowered.org/repository/maven-public/'
+        }
     }
 }
