@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-@Mixin(PlayerEntity.class)
+@Mixin(value = PlayerEntity.class, remap = false)
 public abstract class PlayerEntityMixin extends LivingEntity {
 
     @Shadow protected abstract void dropEquipment();
