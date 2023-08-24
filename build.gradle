@@ -1,29 +1,11 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven {
-            name "Sponge"
-            url "https://repo.spongepowered.org/repository/maven-public/"
-            content { includeGroup "org.spongepowered" }
-        }
-        maven {
-            name = 'Parchment MC'
-            url = 'https://maven.parchmentmc.org'
-        }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath group: 'org.parchmentmc', name: 'librarian', version: '1.+'
-    }
+plugins {
+    id 'idea'
+    id 'eclipse'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
+    id 'org.spongepowered.mixin' version '0.7.+'
 }
-
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
 
 version = mod_version
 group = mod_group_id
@@ -38,6 +20,12 @@ mixin {
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println('Java: ' + System.getProperty('java.version') + ' JVM: ' + System.getProperty('java.vm.version') + '(' + System.getProperty('java.vendor') + ') Arch: ' + System.getProperty('os.arch'))
+
+mixin {
+    add sourceSets.main, "${mod_id}.refmap.json"
+    config "${mod_id}.mixins.json"
+}
+
 minecraft {
     mappings channel: mappings_channel, version: "${mappings_version}-${mc_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -86,6 +74,9 @@ repositories {
     maven {
         name = "Cursemaven"
         url = "https://www.cursemaven.com/"
+        content {
+            includeGroup "curse.maven"
+        }
     }
 
     maven {
@@ -98,6 +89,17 @@ repositories {
     maven {
         name = "ModMaven"
         url = "https://modmaven.dev"
+    }
+
+    maven {
+        name = "JEI"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        url = "https://jitpack.io"
+        content {
+            includeGroupByRegex "com.github.*"
+        }
     }
 
     maven {
@@ -130,6 +132,8 @@ dependencies {
 
     // Testing Dependencies
     runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    runtimeOnly fg.deobf("curse.maven:sophisticated_backpacks-${sophisticated_backpacks_project}:${sophisticated_backpacks_file}") { transitive = false }
+    runtimeOnly fg.deobf("curse.maven:sophisticated_core-${sophisticated_core_project}:${sophisticated_core_file}") { transitive = false }
     //runtimeOnly fg.deobf("curse.maven:cofh-core-${cofh_core_slug}:${cofh_core_file_id}")
     //runtimeOnly fg.deobf("curse.maven:ensorcellation-${ensorcellation_slug}:${ensorcellation_file_id}")
     //runtimeOnly fg.deobf("curse.maven:artifacts-${artifacts_slug}:${artifacts_file_id}")

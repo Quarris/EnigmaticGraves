@@ -14,18 +14,20 @@ import net.minecraftforge.common.util.LazyOptional;
 import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
+import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
 
 import java.util.*;
 
 public class CurioGraveData implements IGraveData {
 
     public static final ResourceLocation NAME = ModRef.res("curios");
-    public final Map<String, NonNullList<ItemStack>> curioStacks = new HashMap<>();
-    public final Map<String, NonNullList<ItemStack>> curioCosmeticStacks = new HashMap<>();
+    private Tag data;
 
     public CurioGraveData(ICuriosItemHandler curios, Collection<ItemStack> drops) {
+        this.data = curios.writeTag();
+
+        // Remove the curios from the drops
         for (Map.Entry<String, ICurioStacksHandler> entry : curios.getCurios().entrySet()) {
-            String id = entry.getKey();
             ICurioStacksHandler curioItems = entry.getValue();
             NonNullList<ItemStack> curioStacksList = NonNullList.withSize(curioItems.getSlots(), ItemStack.EMPTY);
             NonNullList<ItemStack> curioCosmeticStacksList = NonNullList.withSize(curioItems.getSlots(), ItemStack.EMPTY);
@@ -61,8 +63,6 @@ public class CurioGraveData implements IGraveData {
                     }
                 }
             }
-            this.curioStacks.put(id, curioStacksList);
-            this.curioCosmeticStacks.put(id, curioCosmeticStacksList);
         }
     }
 
@@ -74,48 +74,16 @@ public class CurioGraveData implements IGraveData {
     public void restore(Player player) {
         LazyOptional<ICuriosItemHandler> optional = CuriosApi.getCuriosHelper().getCuriosHandler(player);
         optional.ifPresent(handler -> {
-            Map<String, ICurioStacksHandler> curios = handler.getCurios();
-            for (Map.Entry<String, NonNullList<ItemStack>> entry : this.curioStacks.entrySet()) {
-                ICurioStacksHandler stacks = curios.get(entry.getKey());
-                NonNullList<ItemStack> graveItems = entry.getValue();
-                for (int slot = 0; slot < graveItems.size(); slot++) {
-                    if (graveItems.get(slot).isEmpty()) // Dont replace empty items
-                        continue;
-
-                    // If the curios slots have shrunk since last time,
-                    // then add the grave items to the player inventory instead
-                    if (slot >= stacks.getSlots()) {
-                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, graveItems.get(slot));
-                        return;
-                    }
-
-                    ItemStack old = stacks.getStacks().getStackInSlot(slot);
-                    stacks.getStacks().setStackInSlot(slot, graveItems.get(slot));
-                    if (!old.isEmpty()) {
-                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, old);
+            handler.getCurios().values().forEach(curio -> {
+                IDynamicStackHandler stacks = curio.getStacks();
+                for (int slot = 0; slot < stacks.getSlots(); slot++) {
+                    ItemStack stack = stacks.getStackInSlot(slot);
+                    if (!stack.isEmpty()) {
+                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, stack);
                     }
                 }
-            }
-            for (Map.Entry<String, NonNullList<ItemStack>> entry : this.curioCosmeticStacks.entrySet()) {
-                ICurioStacksHandler stacks = curios.get(entry.getKey());
-                NonNullList<ItemStack> graveItems = entry.getValue();
-                for (int slot = 0; slot < graveItems.size(); slot++) {
-                    if (graveItems.get(slot).isEmpty()) // Dont replace empty items
-                        continue;
-                    // If the curios slots have shrunk since last time,
-                    // then add the grave items to the player inventory instead
-                    if (slot >= stacks.getSlots()) {
-                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, graveItems.get(slot));
-                        return;
-                    }
-
-                    ItemStack old = stacks.getCosmeticStacks().getStackInSlot(slot);
-                    stacks.getCosmeticStacks().setStackInSlot(slot, graveItems.get(slot));
-                    if (!old.isEmpty()) {
-                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, slot, old);
-                    }
-                }
-            }
+            });
+            handler.readTag(this.data);
         });
     }
 
@@ -126,47 +94,12 @@ public class CurioGraveData implements IGraveData {
 
     @Override
     public CompoundTag write(CompoundTag nbt) {
-        ListTag stacksNBT = new ListTag();
-        for (Map.Entry<String, NonNullList<ItemStack>> entry : this.curioStacks.entrySet()) {
-            CompoundTag entryNBT = new CompoundTag();
-            entryNBT.putString("ID", entry.getKey());
-            entryNBT.putInt("Size", entry.getValue().size());
-            entryNBT.put("Stacks", ContainerHelper.saveAllItems(new CompoundTag(), entry.getValue()));
-            stacksNBT.add(entryNBT);
-        }
-        nbt.put("Stacks", stacksNBT);
-
-        ListTag cosmeticStacksNBT = new ListTag();
-        for (Map.Entry<String, NonNullList<ItemStack>> entry : this.curioCosmeticStacks.entrySet()) {
-            CompoundTag entryNBT = new CompoundTag();
-            entryNBT.putString("ID", entry.getKey());
-            entryNBT.putInt("Size", entry.getValue().size());
-            entryNBT.put("Stacks", ContainerHelper.saveAllItems(new CompoundTag(), entry.getValue()));
-            cosmeticStacksNBT.add(entryNBT);
-        }
-        nbt.put("CosmeticStacks", cosmeticStacksNBT);
-
+        nbt.put("Data", this.data);
         return nbt;
     }
 
     @Override
     public void read(CompoundTag nbt) {
-        ListTag stacksNBT = nbt.getList("Stacks", Tag.TAG_COMPOUND);
-        for (Tag inbt : stacksNBT) {
-            CompoundTag entryNBT = (CompoundTag) inbt;
-            String id = entryNBT.getString("ID");
-            NonNullList<ItemStack> stacks = NonNullList.withSize(entryNBT.getInt("Size"), ItemStack.EMPTY);
-            ContainerHelper.loadAllItems(entryNBT.getCompound("Stacks"), stacks);
-            this.curioStacks.put(id, stacks);
-        }
-
-        ListTag cosmeticStacksNBT = nbt.getList("CosmeticStacks", Tag.TAG_COMPOUND);
-        for (Tag inbt : cosmeticStacksNBT) {
-            CompoundTag entryNBT = (CompoundTag) inbt;
-            String id = entryNBT.getString("ID");
-            NonNullList<ItemStack> stacks = NonNullList.withSize(entryNBT.getInt("Size"), ItemStack.EMPTY);
-            ContainerHelper.loadAllItems(entryNBT.getCompound("Stacks"), stacks);
-            this.curioCosmeticStacks.put(id, stacks);
-        }
+        this.data = nbt.get("Data");
     }
 }
