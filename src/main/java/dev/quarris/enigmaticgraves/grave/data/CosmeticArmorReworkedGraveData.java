@@ -24,7 +24,7 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
         while(ite.hasNext()){
             ItemStack drop = ite.next();
 
-            for (int slot = 0; slot < 4; slot++){
+            for (int slot = 0; slot < caStacksBase.getSlots(); slot++){
                 ItemStack stack = caStacksBase.getStackInSlot(slot);
                 if (ItemStack.isSame(stack, drop)) {
                     ite.remove();
@@ -41,7 +41,7 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
     public void restore(Player player) {
         CAStacksBase lowPrio = CosArmorAPI.getCAStacks(player.getUUID());
 
-        for (int slot = 0; slot < 4; slot++){
+        for (int slot = 0; slot < lowPrio.getSlots(); slot++){
             ItemStack lowPrioItem = lowPrio.getStackInSlot(slot);
             ItemStack highPrioItem = this.caStacksBase.getStackInSlot(slot);
             if(!lowPrioItem.isEmpty() && !highPrioItem.isEmpty()){

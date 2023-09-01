@@ -4,6 +4,7 @@ import dev.quarris.enigmaticgraves.grave.data.CosmeticArmorReworkedGraveData;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
 import lain.mods.cos.api.CosArmorAPI;
 import lain.mods.cos.api.inventory.CAStacksBase;
+import lain.mods.cos.impl.ModConfigs;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
@@ -17,6 +18,8 @@ public class CosmeticArmorReworkedCompat{
     public static final Map<UUID, CAStacksBase> CACHED_COSMETICARMORREWORKEDS = new HashMap<>();
 
     public static void cacheCosmeticArmorReworkeds(Player player) {
+        if (ModConfigs.CosArmorKeepThroughDeath.get()) return;
+
         try {
             CAStacksBase cached = new CAStacksBase();
             cached.deserializeNBT(CosArmorAPI.getCAStacks(player.getUUID()).serializeNBT());

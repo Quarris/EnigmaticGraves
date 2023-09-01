@@ -122,8 +122,8 @@ dependencies {
         transitive = false
     }
     //implementation fg.deobf("curse.maven:the-one-probe-${theoneprobe_slug}:${theoneprobe_file_id}")
-    runtimeOnly fg.deobf("curse.maven:cosmetic-armor-reworked-${cosmetic_armor_slug}:${cosmetic_armor_file_id}")
-    compileOnly "curse.maven:cosmetic-armor-reworked-${cosmetic_armor_slug}:${cosmetic_armor_api_file_id}"
+    implementation fg.deobf("curse.maven:cosmetic-armor-reworked-${cosmetic_armor_slug}:${cosmetic_armor_file_id}")
+    //compileOnly "curse.maven:cosmetic-armor-reworked-${cosmetic_armor_slug}:${cosmetic_armor_api_file_id}"
 
     //compile fg.deobf("mcp.mobius.waila:Hwyla:1.10.11-+")
     //compileOnly "curse.maven:hwyla-${hwyla_slug}:${hwyla_version}"
