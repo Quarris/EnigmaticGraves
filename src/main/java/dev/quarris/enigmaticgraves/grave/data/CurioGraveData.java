@@ -72,6 +72,8 @@ public class CurioGraveData implements IGraveData {
 
     @Override
     public void restore(Player player) {
+        if (this.data == null) return;
+
         LazyOptional<ICuriosItemHandler> optional = CuriosApi.getCuriosHelper().getCuriosHandler(player);
         optional.ifPresent(handler -> {
             handler.getCurios().values().forEach(curio -> {
@@ -94,12 +96,17 @@ public class CurioGraveData implements IGraveData {
 
     @Override
     public CompoundTag write(CompoundTag nbt) {
-        nbt.put("Data", this.data);
+        if (this.data != null) {
+            nbt.put("Data", this.data);
+        }
         return nbt;
     }
 
     @Override
     public void read(CompoundTag nbt) {
-        this.data = nbt.get("Data");
+        if (nbt.contains("Data")) {
+            this.data = nbt.get("Data");
+        }
     }
+
 }

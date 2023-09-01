@@ -42,62 +42,62 @@ public class RestoreGraveCommand {
     private static final Component GRAVE_ALREADY_RESTORED = Component.literal("Warning: That grave has already been restored. Add 'true' at the end of the last command to restore again.");
     private static final Component SUCCESSFULLY_RESTORED = Component.literal("Successfully restored the grave.");
     private static final Component HELP = Component.empty().withStyle(ChatFormatting.RED)
-            .append("Usage:\n")
-            .append("/enigmatic_graves <player> list\n")
-            .append("/enigmatic_graves <player> clear\n")
-            .append("/enigmatic_graves <player> restore [death_<id> [forced]]");
+        .append("Usage:\n")
+        .append("/enigmatic_graves <player> list\n")
+        .append("/enigmatic_graves <player> clear\n")
+        .append("/enigmatic_graves <player> restore [death_<id> [forced]]");
 
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralCommandNode<CommandSourceStack> cmd = dispatcher
-                .register(Commands.literal("enigmatic_graves")
-                        .requires(source -> source.hasPermission(2))
-                        .executes(ctx -> {
-                            ctx.getSource().sendSuccess(HELP, false);
-                            return 0;
-                        })
-                        .then(Commands.argument("target", EntityArgument.player())
-                                .then(Commands.literal("list").executes(ctx -> {
-                                    ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
-                                    List<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(ctx.getSource().getLevel()).getGraveEntriesForPlayer(player.getUUID());
-                                    if (entries == null) {
-                                        ctx.getSource().sendSuccess(Component.literal("The player has no deaths."), false);
-                                        return 0;
-                                    }
-                                    StringBuilder sb = new StringBuilder();
-                                    for (int i = 0; i < entries.size(); i++) {
-                                        sb.append(entries.get(i).getEntryName(i));
-                                        if (i < entries.size() - 1) {
-                                            sb.append('\n');
-                                        }
-                                    }
-                                    ctx.getSource().sendSuccess(Component.literal(sb.toString()), false);
-                                    return 0;
-                                }))
-                                .then(Commands.literal("restore")
-                                        .executes(ctx -> restoreGrave(ctx, false, false))
-                                        .then(Commands.argument("forced", BoolArgumentType.bool())
-                                                .executes(ctx -> restoreGrave(ctx, false, BoolArgumentType.getBool(ctx, "forced"))))
-                                        .then(Commands.argument("entry", new GraveEntryArgument())
-                                                .suggests(SUGGEST_ENTRIES)
-                                                .executes(ctx -> restoreGrave(ctx, true, false))
-                                                .then(Commands.argument("forced", BoolArgumentType.bool())
-                                                        .executes(ctx -> restoreGrave(ctx, true, BoolArgumentType.getBool(ctx, "forced"))))))
-                                .then(Commands.literal("clear")
-                                        .executes(ctx -> {
-                                            ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
-                                            int count = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID()).size();
-                                            GraveManager.getWorldGraveData(player.level).clearGraveEntries(player);
-                                            ctx.getSource().sendSuccess(Component.literal("Cleared " + count + " entries."), true);
-                                            return 0;
-                                        }))));
-
-
-        dispatcher.register(Commands.literal("graves").requires(source -> source.hasPermission(2))
+            .register(Commands.literal("enigmatic_graves")
+                .requires(source -> source.hasPermission(2))
                 .executes(ctx -> {
                     ctx.getSource().sendSuccess(HELP, false);
                     return 0;
-                }).redirect(cmd));
+                })
+                .then(Commands.argument("target", EntityArgument.player())
+                    .then(Commands.literal("list").executes(ctx -> {
+                        ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
+                        List<PlayerGraveEntry> entries = GraveManager.getWorldGraveData(ctx.getSource().getLevel()).getGraveEntriesForPlayer(player.getUUID());
+                        if (entries == null) {
+                            ctx.getSource().sendSuccess(Component.literal("The player has no deaths."), false);
+                            return 0;
+                        }
+                        StringBuilder sb = new StringBuilder();
+                        for (int i = 0; i < entries.size(); i++) {
+                            sb.append(entries.get(i).getEntryName(i));
+                            if (i < entries.size() - 1) {
+                                sb.append('\n');
+                            }
+                        }
+                        ctx.getSource().sendSuccess(Component.literal(sb.toString()), false);
+                        return 0;
+                    }))
+                    .then(Commands.literal("restore")
+                        .executes(ctx -> restoreGrave(ctx, false, false))
+                        .then(Commands.argument("forced", BoolArgumentType.bool())
+                            .executes(ctx -> restoreGrave(ctx, false, BoolArgumentType.getBool(ctx, "forced"))))
+                        .then(Commands.argument("entry", new GraveEntryArgument())
+                            .suggests(SUGGEST_ENTRIES)
+                            .executes(ctx -> restoreGrave(ctx, true, false))
+                            .then(Commands.argument("forced", BoolArgumentType.bool())
+                                .executes(ctx -> restoreGrave(ctx, true, BoolArgumentType.getBool(ctx, "forced"))))))
+                    .then(Commands.literal("clear")
+                        .executes(ctx -> {
+                            ServerPlayer player = EntityArgument.getPlayer(ctx, "target");
+                            int count = GraveManager.getWorldGraveData(player.level).getGraveEntriesForPlayer(player.getUUID()).size();
+                            GraveManager.getWorldGraveData(player.level).clearGraveEntries(player);
+                            ctx.getSource().sendSuccess(Component.literal("Cleared " + count + " entries."), true);
+                            return 0;
+                        }))));
+
+
+        dispatcher.register(Commands.literal("graves").requires(source -> source.hasPermission(2))
+            .executes(ctx -> {
+                ctx.getSource().sendSuccess(HELP, false);
+                return 0;
+            }).redirect(cmd));
     }
 
     private static int restoreGrave(CommandContext<CommandSourceStack> ctx, boolean useArg, boolean forced) throws CommandSyntaxException {
@@ -107,7 +107,7 @@ public class RestoreGraveCommand {
             entry = GraveEntryArgument.getEntry(player.getUUID(), ctx, "entry");
         } else {
             entry = GraveManager.getWorldGraveData(ctx.getSource().getLevel())
-                    .getGraveEntriesForPlayer(player.getUUID()).getFirst();
+                .getGraveEntriesForPlayer(player.getUUID()).getFirst();
         }
         if (!tryRestoreGrave(entry, player, forced)) {
             ctx.getSource().sendSuccess(GRAVE_ALREADY_RESTORED, true);
