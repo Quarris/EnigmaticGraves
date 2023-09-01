@@ -7,7 +7,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 public interface IGraveData extends INBTSerializable<CompoundTag> {
 
-    void restore(Player player);
+    void restore(Player player, boolean shouldReplace);
     ResourceLocation getName();
 
     CompoundTag write(CompoundTag nbt);

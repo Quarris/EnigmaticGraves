@@ -24,6 +24,7 @@ public class GraveConfigs {
         // Misc
         public BooleanValue spawnGraveFinder;
         public BooleanValue sneakRetrieval;
+        public BooleanValue allowNonOwnerRetrieval;
 
         // Data
         public EnumValue<ExperienceHandling> experienceGraveHandling;
@@ -42,6 +43,9 @@ public class GraveConfigs {
             this.sneakRetrieval = builder.comment(
                 "Set to false to disable retrieval by sneaking on top of the grave."
             ).define("sneakRetrieval", true);
+            this.allowNonOwnerRetrieval = builder.comment(
+                "Should any player be allowed to retrieve anyones graves."
+            ).define("allowNonOwnerRetrieval", false);
             builder.pop();
             builder.comment("How the grave data is handled").push("data");
             this.experienceGraveHandling = builder.comment(

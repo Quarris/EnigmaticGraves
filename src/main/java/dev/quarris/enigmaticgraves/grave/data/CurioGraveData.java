@@ -4,10 +4,8 @@ import dev.quarris.enigmaticgraves.utils.ModRef;
 import dev.quarris.enigmaticgraves.utils.PlayerInventoryExtensions;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.common.util.LazyOptional;
@@ -15,6 +13,7 @@ import top.theillusivec4.curios.api.CuriosApi;
 import top.theillusivec4.curios.api.type.capability.ICuriosItemHandler;
 import top.theillusivec4.curios.api.type.inventory.ICurioStacksHandler;
 import top.theillusivec4.curios.api.type.inventory.IDynamicStackHandler;
+import top.theillusivec4.curios.common.capability.CurioInventoryCapability;
 
 import java.util.*;
 
@@ -71,9 +70,28 @@ public class CurioGraveData implements IGraveData {
     }
 
     @Override
-    public void restore(Player player) {
+    public void restore(Player player, boolean shouldReplace) {
         if (this.data == null) return;
 
+        if (!shouldReplace) {
+            // If we are not replacing curios, create new inventory to load the stored data,
+            // and add the loaded items into player inventory.
+            ICuriosItemHandler newCurios = new CurioInventoryCapability.CurioInventoryWrapper(player);
+            newCurios.readTag(this.data);
+            newCurios.getCurios().values().forEach(curio -> {
+                IDynamicStackHandler stacks = curio.getStacks();
+                for (int slot = 0; slot < stacks.getSlots(); slot++) {
+                    ItemStack stack = stacks.getStackInSlot(slot);
+                    if (!stack.isEmpty()) {
+                        PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, stack);
+                    }
+                }
+            });
+            return;
+        }
+
+        // Otherwise we want to place existing curios into the player inventory,
+        // and then load the stored curios.
         LazyOptional<ICuriosItemHandler> optional = CuriosApi.getCuriosHelper().getCuriosHandler(player);
         optional.ifPresent(handler -> {
             handler.getCurios().values().forEach(curio -> {

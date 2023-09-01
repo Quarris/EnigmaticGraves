@@ -21,10 +21,10 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
         this.caStacksBase.deserializeNBT(caStacksBase.serializeNBT());
 
         Iterator<ItemStack> ite = drops.iterator();
-        while(ite.hasNext()){
+        while (ite.hasNext()) {
             ItemStack drop = ite.next();
 
-            for (int slot = 0; slot < caStacksBase.getSlots(); slot++){
+            for (int slot = 0; slot < caStacksBase.getSlots(); slot++) {
                 ItemStack stack = caStacksBase.getStackInSlot(slot);
                 if (ItemStack.isSame(stack, drop)) {
                     ite.remove();
@@ -38,24 +38,32 @@ public class CosmeticArmorReworkedGraveData implements IGraveData {
     }
 
     @Override
-    public void restore(Player player) {
-        CAStacksBase lowPrio = CosArmorAPI.getCAStacks(player.getUUID());
+    public void restore(Player player, boolean shouldReplace) {
+        CAStacksBase currentInv = CosArmorAPI.getCAStacks(player.getUUID());
+        for (int slot = 0; slot < this.caStacksBase.getSlots(); slot++) {
+            ItemStack graveStack = this.caStacksBase.getStackInSlot(slot);
+            if (!shouldReplace) { // If we are not replacing the inventory then just add the grave stack to it.
+                if (!graveStack.isEmpty()) {
+                    PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, graveStack);
+                }
+                continue;
+            }
 
-        for (int slot = 0; slot < lowPrio.getSlots(); slot++){
-            ItemStack lowPrioItem = lowPrio.getStackInSlot(slot);
-            ItemStack highPrioItem = this.caStacksBase.getStackInSlot(slot);
-            if(!lowPrioItem.isEmpty() && !highPrioItem.isEmpty()){
+            ItemStack equippedStack = currentInv.getStackInSlot(slot);
+            if (!equippedStack.isEmpty() && !graveStack.isEmpty()) {
                 // the player equipped cosmetic armor before claiming the grave,
                 // here we de-equip any worn item in favor of what is inside the grave.
-                PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, lowPrioItem);
-            }else if(!lowPrioItem.isEmpty()){
+                PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, equippedStack);
+            } else if (!equippedStack.isEmpty()) {
                 // if the player is wearing something in a cosmetic armor slot that is not in the grave,
                 // then it gets put in the serializer so the final line of this function doesn't delete it.
-                this.caStacksBase.setStackInSlot(slot, lowPrioItem);
+                this.caStacksBase.setStackInSlot(slot, equippedStack);
             }
         }
 
-        lowPrio.deserializeNBT(this.caStacksBase.serializeNBT());
+        if (shouldReplace) {
+            currentInv.deserializeNBT(this.caStacksBase.serializeNBT());
+        }
     }
 
     @Override
