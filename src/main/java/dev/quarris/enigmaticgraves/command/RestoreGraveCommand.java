@@ -35,7 +35,8 @@ public class RestoreGraveCommand {
                 PlayerGraveEntry entry = entries.get(i);
                 builder.suggest(entry.getEntryName(i));
             }
-        } catch (CommandSyntaxException e) { }
+        } catch (CommandSyntaxException e) {
+        }
         return builder.buildFuture();
     };
 
