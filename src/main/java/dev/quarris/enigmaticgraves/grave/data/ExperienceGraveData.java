@@ -20,7 +20,7 @@ public class ExperienceGraveData implements IGraveData {
     }
 
     @Override
-    public void restore(Player player) {
+    public void restore(Player player, boolean shouldReplace) {
         player.giveExperiencePoints(this.xp);
     }
 

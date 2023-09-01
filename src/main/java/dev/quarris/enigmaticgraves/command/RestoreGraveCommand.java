@@ -126,7 +126,7 @@ public class RestoreGraveCommand {
             return false;
         }
         for (IGraveData graveData : graveEntry.dataList) {
-            graveData.restore(player);
+            graveData.restore(player, false);
         }
         if (!graveEntry.isRestored()) {
             GraveManager.getWorldGraveData(player.level).setGraveRestored(graveEntry.graveUUID);

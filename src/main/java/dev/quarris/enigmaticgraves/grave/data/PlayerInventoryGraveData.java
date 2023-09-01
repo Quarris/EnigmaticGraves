@@ -68,17 +68,36 @@ public class PlayerInventoryGraveData implements IGraveData {
     }
 
     @Override
-    public void restore(Player player) {
-        Inventory highPriority = new Inventory(player);
-        highPriority.load(this.data);
+    public void restore(Player player, boolean shouldReplace) {
+        // If we are not replacing the inventory, simply load a new instance and add all items to the player inventory.
+        if (!shouldReplace) {
+            Inventory storedInventory = new Inventory(player);
+            storedInventory.load(this.data);
 
-        Inventory lowPriority = new Inventory(player);
-        lowPriority.replaceWith(player.getInventory());
+            for (int slot = 0; slot < storedInventory.getContainerSize(); slot++) {
+                ItemStack item = storedInventory.getItem(slot);
+                if (item.isEmpty())
+                    continue;
 
-        player.getInventory().replaceWith(highPriority);
+                PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, item);
+            }
 
-        for (int slot = 0; slot < lowPriority.getContainerSize(); slot++) {
-            ItemStack item = lowPriority.getItem(slot);
+            for (ItemStack remainingStack : this.remainingItems) {
+                PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, remainingStack);
+            }
+            return;
+        }
+
+        Inventory storedInventory = new Inventory(player);
+        storedInventory.load(this.data);
+
+        Inventory currentInventory = new Inventory(player);
+        currentInventory.replaceWith(player.getInventory());
+
+        player.getInventory().replaceWith(storedInventory);
+
+        for (int slot = 0; slot < currentInventory.getContainerSize(); slot++) {
+            ItemStack item = currentInventory.getItem(slot);
             if (item.isEmpty())
                 continue;
 
@@ -86,9 +105,7 @@ public class PlayerInventoryGraveData implements IGraveData {
         }
 
         for (ItemStack remainingStack : this.remainingItems) {
-            if (!player.getInventory().add(remainingStack)) {
-                player.spawnAtLocation(remainingStack);
-            }
+            PlayerInventoryExtensions.tryAddItemToPlayerInvElseDrop(player, -1, remainingStack);
         }
     }
 

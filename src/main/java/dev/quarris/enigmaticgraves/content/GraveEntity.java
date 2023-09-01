@@ -1,5 +1,6 @@
 package dev.quarris.enigmaticgraves.content;
 
+import dev.quarris.enigmaticgraves.EnigmaticGraves;
 import dev.quarris.enigmaticgraves.config.GraveConfigs;
 import dev.quarris.enigmaticgraves.grave.GraveManager;
 import dev.quarris.enigmaticgraves.grave.data.IGraveData;
@@ -97,16 +98,16 @@ public class GraveEntity extends Entity {
     @Override
     public void playerTouch(Player player) {
         if (GraveConfigs.COMMON.sneakRetrieval.get() && player.isShiftKeyDown()) {
-            if (this.belongsTo(player)) {
-                this.restoreGrave(player);
+            if (this.canRetrieve(player)) {
+                this.restoreGrave(player, player.getUUID().equals(this.getOwnerUUID()));
             }
         }
     }
 
     @Override
     public InteractionResult interact(Player player, InteractionHand hand) {
-        if (this.belongsTo(player)) {
-            this.restoreGrave(player);
+        if (this.canRetrieve(player)) {
+            this.restoreGrave(player, player.getUUID().equals(this.getOwnerUUID()));
             return InteractionResult.sidedSuccess(this.level.isClientSide);
         }
 
@@ -121,7 +122,7 @@ public class GraveEntity extends Entity {
         return InteractionResult.PASS;
     }
 
-    private void restoreGrave(Player player) {
+    private void restoreGrave(Player player, boolean shouldReplace) {
         if (!this.isAlive() || this.level.isClientSide())
             return;
 
@@ -142,7 +143,7 @@ public class GraveEntity extends Entity {
         }
 
         for (IGraveData data : this.contents) {
-            data.restore(player);
+            data.restore(player, shouldReplace);
         }
         GraveManager.setGraveRestored(this.getOwnerUUID(), this);
         this.restored = true;
@@ -157,8 +158,8 @@ public class GraveEntity extends Entity {
         }
     }
 
-    private boolean belongsTo(Player player) {
-        return player.getUUID().equals(this.getOwnerUUID());
+    private boolean canRetrieve(Player player) {
+        return GraveConfigs.COMMON.allowNonOwnerRetrieval.get() || player.getUUID().equals(this.getOwnerUUID());
     }
 
     @Override
